@@ -1,0 +1,17 @@
+Package: RUVIIINM
+Type: Package
+Title: RUV-III-NM
+Version: 0.0.1
+Date: 2019-09-09
+Author: Rohan Shah
+Maintainer: Rohan Shah <rshah@cmri.org.au>
+Description: Variations of RUV-III which perform normalisation based only on the non-missing values. Originally designed for SWATH-MS proteomics datasets. 
+License: GPL-3 + file LICENSE
+LazyLoad: yes
+Depends: 
+    R (>= 3.4),
+    RSpectra,
+    progress,
+    ruv
+Collate:
+    'RUVIII_NM_Varying.R'

@@ -15,3 +15,4 @@ Depends:
     ruv
 Collate:
     'RUVIII_NM_Varying.R'
+    'RUVIII_NM.R'

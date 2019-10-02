@@ -121,5 +121,12 @@ RUVIII_C <- function(k, ruvInputData, M, toCorrect, filename, controls, withW = 
 		#If we've made any new computations write out to file. 
 		if(newComputation) save(results, file = filename)
 	}
-	return(results)
+	if(withW)
+	{
+		return(list(newY = do.call(cbind, results$peptideResults), W = results$W))
+	}
+	else
+	{
+		return(do.call(cbind, results$peptideResults))
+	}
 }

@@ -1,6 +1,6 @@
-Package: RUVIIINZ
+Package: RUVIIIC
 Type: Package
-Title: RUV-III-NZ
+Title: RUV-III-C
 Version: 0.0.1
 Date: 2019-09-09
 Author: Rohan Shah
@@ -14,5 +14,6 @@ Depends:
     progress,
     ruv
 Collate:
-    'RUVIII_NZ_Varying.R'
-    'RUVIII_NZ.R'
+    'RUVIII_C_Varying.R'
+    'RUVIII_C_Varying_Reduced.R'
+    'RUVIII_C.R'

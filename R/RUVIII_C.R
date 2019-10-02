@@ -1,4 +1,4 @@
-RUVIII_NZ <- function(k, ruvInputData, M, toCorrect, filename, controls, withW = FALSE, batchSize = 1000)
+RUVIII_C <- function(k, ruvInputData, M, toCorrect, filename, controls, withW = FALSE, batchSize = 1000)
 {
 	if(missing(filename))
 	{

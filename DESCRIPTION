@@ -16,3 +16,6 @@ Depends:
 Collate:
     'RUVIII_C_Varying.R'
     'RUVIII_C.R'
+    'data.R'
+    'roxygen.R'
+RoxygenNote: 6.1.1

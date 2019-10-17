@@ -2,13 +2,13 @@
 #'
 #' Apply RUV-III in the presence of missing values
 #' 
-#' This function applies RUV-III to the given dataset. However, it applies the RUV-III correction separately to every variable. If variable X is being corrected, we take the rows of the data matrix for which X is non-missing. RUV-III is then applied, and the corrected values of X is retained. The corrected values of all other variables are discarded. Note that when we subset the data matrix, other columns besides X will still have missing values. These values are replaced with zero in order to apply RUV-III.
+#' This function applies RUV-III to the given dataset. However, it applies the RUV-III correction separately to every variable. If variable X is being corrected, we take the rows of the data matrix for which X is non-missing. RUV-III is then applied, and the corrected values of X is retained. The corrected values of all other variables are discarded. Note that when we take a subset of the rows of the data matrix, other columns besides X will still have missing values. These values are replaced with zero in order to apply RUV-III.
 #' @param k The number of factors of unwanted variation to remove
-#' @param ruvInputData The input data matrix. Must be a matrix, not a data.frame.
+#' @param ruvInputData The input data matrix. Must be a matrix, not a data.frame
 #' @param M The design matrix containing information about technical replicates
 #' @param toCorrect The variables to correct using RUV-III-C
 #' @param filename The intermediate file in which to save the results
-#' @param controls The names of the control variables which are known to be constant across the observations.
+#' @param controls The names of the control variables which are known to be constant across the observations
 #' @param withW Should we keep the estimate of the unwanted variation factors W, for each variable which is corrected?
 #' @param batchSize How often should we write to the intermediate file? batchSize = 1000 implies that results are written to file every 1000 variables. 
 #'
@@ -18,7 +18,7 @@
 #' data(crossLab)
 #' #Design matrix containing information about which runs are technical replicates of each other. 
 #' #In this case, random pairings of mass-spec runs analysing the same sample, at different sites.
-#' M <- model.matrix(~ grouping, data = peptideData)
+#' M <- model.matrix(~ grouping - 1, data = peptideData)
 #' #Get out the list of peptides, both HEK (control) and peptides of interest.
 #' peptides <- setdiff(colnames(peptideData), c("filename", "site", "mixture", "Date", "grouping"))
 #' #Reduce the data matrix to only the peptide data
@@ -42,9 +42,17 @@ RUVIII_C <- function(k, ruvInputData, M, toCorrect, filename, controls, withW = 
 	{
 		stop("Input k, the number of factors of unwanted variation, must be positive")
 	}
+	if(is.factor(controls))
+	{
+		stop("Input controls was a factor. Please input a vector of variable names")
+	}
 	if(is.null(rownames(ruvInputData)))
 	{
 		stop("Function RUVIII_NM_Varying requires row-names for input ruvInputData")
+	}
+	if(any(apply(M, 2, sum) == nrow(M)))
+	{
+		warning("Input design matrix had a column of all ones, indicating an intercept term. This is generally an error!")
 	}
 	#Replace NAs with 0
 	ruvInputDataWithoutNA <- ruvInputData

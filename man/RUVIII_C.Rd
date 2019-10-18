@@ -2,7 +2,7 @@
 % Please edit documentation in R/RUVIII_C.R
 \name{RUVIII_C}
 \alias{RUVIII_C}
-\title{RUV-III applied to complete rows}
+\title{RUV-III-C}
 \usage{
 RUVIII_C(k, ruvInputData, M, toCorrect, filename, controls,
   withW = FALSE, batchSize = 1000)
@@ -10,34 +10,43 @@ RUVIII_C(k, ruvInputData, M, toCorrect, filename, controls,
 \arguments{
 \item{k}{The number of factors of unwanted variation to remove}
 
-\item{ruvInputData}{The input data matrix. Must be a matrix, not a data.frame.}
+\item{ruvInputData}{The input data matrix. Must be a matrix, not a data.frame. It should contain missing (NA) values, rather than zeros.}
 
-\item{M}{The design matrix containing information about technical replicates}
+\item{M}{The design matrix containing information about technical replicates. It should not contain an intercept term!}
 
-\item{toCorrect}{The variables to correct using RUV-III-C}
+\item{toCorrect}{The names of the variables to correct using RUV-III-C}
 
-\item{filename}{The intermediate file in which to save the results}
+\item{filename}{The intermediate file in which to save the results.}
 
-\item{controls}{The names of the control variables which are known to be constant across the observations.}
+\item{controls}{The names of the control variables which are known to be constant across the observations}
 
 \item{withW}{Should we keep the estimate of the unwanted variation factors W, for each variable which is corrected?}
 
-\item{batchSize}{How often should we write to the intermediate file? batchSize = 1000 implies that results are written to file every 1000 variables.}
+\item{batchSize}{How often should we write to the intermediate file? The default of 1000 implies that results are written to file every 1000 variables.}
 }
 \value{
 If withW = FALSE, returns a matrix. If withW = TRUE, returns a list with entries named \code{newY} and \code{W}.
 }
 \description{
-Apply RUV-III in the presence of missing values
+Apply RUV-III-C, a variation of RUV-III that only uses non-missing values
 }
 \details{
-This function applies RUV-III to the given dataset. However, it applies the RUV-III correction separately to every variable. If variable X is being corrected, we take the rows of the data matrix for which X is non-missing. RUV-III is then applied, and the corrected values of X is retained. The corrected values of all other variables are discarded. Note that when we subset the data matrix, other columns besides X will still have missing values. These values are replaced with zero in order to apply RUV-III.
+RUV-III is a sophisticated method for removing unwanted variation. The key difficulty in removing unwanted variation is distinguishing wanted from unwanted variation. RUV-III solves this by relying on technical replication, and a list of variables (known as negative control variables) which are known a priori to be constant across all observations. Any variation in the negative control variables across the dataset is (by assumption) unwanted. So we can distinguish wanted from unwanted variation, and therefore estimate the unwanted variation and remove it.
+
+One problem with this approach is the presence of ``missing'' or zero values in certain application domains. For example, in proteomics it will sometimes be the case that a protein or peptide is not detected in a specific technical replicate of a sample, for purely technical reasons relating to data collection. These missing values are often not related to censoring or the limit of detection. Similar problems occur in metabolomics and single-cell transcriptomics. In all these cases, the metabolite, gene or peptide will be recorded as a zero in the data matrix. Where this type of variation occurs between technical replicates (e.g. one records a zero value and one records a non-zero value) is not correctable.
+
+Regardless of the reason for these zeros, and whether they are accurate or not, zero values are not affected by technical variation, which breaks an assumption of the RUV-III model. In the case that a zero value is incorrect, more serious problems occur. The discrepancies between a pair of technical replicates due to zero values will appear to be much larger than the discrepancies due to other (correctable) technical factors. RUV-III will attempt to correct for the larger (uncorrectable) discrepancy, and ignore the correctable technical factors.
+
+RUV-III-C is a variation of RUV-III that attempts to solve this problem, by applying RUV-III separately to every variable. If variable X is being corrected, we take the rows of the data matrix for which X is non-missing. RUV-III is then applied, and the corrected values of X is retained. The corrected values of all other variables are discarded. Note that when we take a subset of the rows of the data matrix, other columns besides X will still have missing values. These values are replaced with zero in order to apply RUV-III.
+
+This function takes an intermediate filename, used to store the results. If the function is run again, the previously computed results are loaded directly from the intermediate file, without checking if the inputs specified to the function are the same as those used to generate the previous intermediate result. To re-run a computation, the intermediate file must be deleted.
 }
 \examples{
 data(crossLab)
 #Design matrix containing information about which runs are technical replicates of each other. 
 #In this case, random pairings of mass-spec runs analysing the same sample, at different sites.
-M <- model.matrix(~ grouping, data = peptideData)
+#Note that we specify no intercept term!
+M <- model.matrix(~ grouping - 1, data = peptideData)
 #Get out the list of peptides, both HEK (control) and peptides of interest.
 peptides <- setdiff(colnames(peptideData), c("filename", "site", "mixture", "Date", "grouping"))
 #Reduce the data matrix to only the peptide data

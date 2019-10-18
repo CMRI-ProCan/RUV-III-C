@@ -6,7 +6,7 @@ Date: 2019-09-09
 Author: Rohan Shah
 Maintainer: Rohan Shah <rshah@cmri.org.au>
 Description: Variations of RUV-III which perform normalisation based only on the non-missing values. Originally designed for SWATH-MS proteomics datasets. 
-License: GPL-3 + file LICENSE
+License: GPL-3
 LazyLoad: yes
 Depends: 
     R (>= 3.4),

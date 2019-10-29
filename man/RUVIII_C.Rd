@@ -10,7 +10,7 @@ RUVIII_C(k, ruvInputData, M, toCorrect, filename, controls,
 \arguments{
 \item{k}{The number of factors of unwanted variation to remove}
 
-\item{ruvInputData}{The input data matrix. Must be a matrix, not a data.frame. It should contain missing (NA) values, rather than zeros.}
+\item{ruvInputData}{The input data matrix. Must be a matrix, not a data.frame. It should contain missing (NA) values, rather than zeros. No additional transformation is applied to the input data.}
 
 \item{M}{The design matrix containing information about technical replicates. It should not contain an intercept term!}
 
@@ -37,7 +37,7 @@ One problem with this approach is the presence of ``missing'' or zero values in 
 
 Regardless of the reason for these zeros, and whether they are accurate or not, zero values are not affected by technical variation, which breaks an assumption of the RUV-III model. In the case that a zero value is incorrect, more serious problems occur. The discrepancies between a pair of technical replicates due to zero values will appear to be much larger than the discrepancies due to other (correctable) technical factors. RUV-III will attempt to correct for the larger (uncorrectable) discrepancy, and ignore the correctable technical factors.
 
-RUV-III-C is a variation of RUV-III that attempts to solve this problem, by applying RUV-III separately to every variable. If variable X is being corrected, we take the rows of the data matrix for which X is non-missing. RUV-III is then applied, and the corrected values of X is retained. The corrected values of all other variables are discarded. Note that when we take a subset of the rows of the data matrix, other columns besides X will still have missing values. These values are replaced with zero in order to apply RUV-III.
+RUV-III-C is a variation of RUV-III that attempts to solve this problem, by applying RUV-III separately to every variable. If variable X is being corrected, we take the rows of the data matrix for which X is non-missing. RUV-III is then applied, and the corrected values of X is retained. The corrected values of all other variables are discarded. Note that when we take a subset of the rows of the data matrix, other columns besides X will still have missing values. These values are replaced with zero in order to apply RUV-III. No additional transformation is applied to the input data matrix. If normalization should be applied on the log-scale, then logged data must be input.
 
 This function takes an intermediate filename, used to store the results. If the function is run again, the previously computed results are loaded directly from the intermediate file, without checking if the inputs specified to the function are the same as those used to generate the previous intermediate result. To re-run a computation, the intermediate file must be deleted.
 }

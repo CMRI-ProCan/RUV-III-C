@@ -1,0 +1,33 @@
+version: 2
+
+variables:
+  linux: &linux
+
+  build: &build
+    run:
+      command: |
+        R CMD INSTALL ruviii_c
+
+  common: &common
+    run:
+      command: |
+        printf 'export WORKSPACE=%s\n' $(pwd) >> $BASH_ENV
+  test: &test
+    run:
+      command: |
+        cd ${WORKSPACE}/ruviii_c/tests && R -e "source('./testthat.R')"
+
+jobs:
+  build-linux:
+    <<: *linux
+    steps:
+      - *common
+      - checkout
+      - *build
+      - *test
+
+workflows:
+  version: 2
+  batchingDiscrete-test:
+    jobs:
+      - build-linux

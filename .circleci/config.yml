@@ -1,6 +1,10 @@
 version: 2
 
 variables:
+  linux: &linux
+    docker:
+      - image: r-base
+
   build: &build
     run:
       command: |
@@ -17,6 +21,7 @@ variables:
 
 jobs:
   build-linux:
+    <<: *linux
     steps:
       - *common
       - checkout
@@ -25,6 +30,6 @@ jobs:
 
 workflows:
   version: 2
-  batchingDiscrete-test:
+  ruviii-c-test:
     jobs:
       - build-linux

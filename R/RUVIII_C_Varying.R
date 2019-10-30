@@ -6,6 +6,8 @@
 #'
 #' When normalizing variable X, the algorithm begins by selecting the rows of the data matrix for which X is non-missing. Out of the potential negative control peptides, it selects those that are always non-missing across the selected subset. The standard version of RUV-III is then applied, similar to \link{RUVIII_C}. 
 #' 
+#' There are two implementations of this function, one in C++ and one in R. Select which version using the \code{version} argument, which must be either "CPP" or "R"
+#' 
 #' @param k The number of factors of unwanted variation to remove
 #' @param ruvInputData The input data matrix. Must be a matrix, not a data.frame. It should contain missing (NA) values, rather than zeros. 
 #' @param M The design matrix containing information about technical replicates. It should not contain an intercept term!
@@ -14,15 +16,31 @@
 #' @param potentialControls The names of the control variables which are known to be constant across the observations
 #' @param withW Should we keep the estimate of the unwanted variation factors W, for each variable which is corrected?
 #' @param batchSize How often should we write to the intermediate file? The default of 1000 implies that results are written to file every 1000 variables. 
+#' @param version The version of the underlying code to use. Must be either "CPP" or "R"
 #'
 #' @return If withW = FALSE, returns a matrix. If withW = TRUE, returns a list with entries named \code{newY} and \code{W}.
 #'
 #' @export
-RUVIII_C_Varying <- function(k, ruvInputData, M, toCorrect, filename, potentialControls, withW = FALSE, batchSize = 1000)
+RUVIII_C_Varying <- function(k, ruvInputData, M, toCorrect, filename, potentialControls, withW = FALSE, batchSize = 1000, version = "CPP")
+{
+	if(version == "CPP")
+	{
+		return(RUVIII_C_Varying_CPP(k = k, input = ruvInputData, M = M, toCorrect = toCorrect, potentialControls = potentialControls, withW = withW))
+	}
+	else if(version == "R")
+	{
+		return(RUVIII_C_Varying_R(k = k, ruvInputData = ruvInputData, M = M, toCorrect = toCorrect, filename = filename, potentialControls = potenitalControls, withW = withW, batchSize = batchSize))
+	}
+	else
+	{
+		stop("version must be either 'CPP' or 'R'")
+	}
+}
+RUVIII_C_Varying_R <- function(k, ruvInputData, M, toCorrect, filename, potentialControls, withW = FALSE, batchSize = 1000)
 {
 	if(missing(filename))
 	{
-		stop("Function RUVIII_NM_Varying requires a filename for intermediate results")
+		stop("Function RUVIII_NM_Varying requires a filename for intermediate results, or NULL if an intermediate file should not be used")
 	}
 	if(k <= 0)
 	{
@@ -32,6 +50,14 @@ RUVIII_C_Varying <- function(k, ruvInputData, M, toCorrect, filename, potentialC
 	{
 		stop("Function RUVIII_NM_Varying requires row-names for input ruvInputData")
 	}
+	if(k >= nrow(ruvInputData))
+	{
+		stop("Input k cannot be larger than the number of rows in the input matrix")
+	}
+	if(k >= length(potentialControls))
+	{
+		stop("Input k cannot be larger than the number of negative controls")
+	}
 	#Replace NAs with 0
 	ruvInputDataWithoutNA <- ruvInputData
 	ruvInputDataWithoutNA[is.na(ruvInputDataWithoutNA)] <- 0
@@ -40,7 +66,7 @@ RUVIII_C_Varying <- function(k, ruvInputData, M, toCorrect, filename, potentialC
 	results$peptideResults <- results$alphaResults <- results$W <- list()
 
 	#Load previous results set. 
-	if(file.exists(filename))
+	if(!is.null(filename) && file.exists(filename))
 	{
 		load(filename)
 	}
@@ -73,7 +99,8 @@ RUVIII_C_Varying <- function(k, ruvInputData, M, toCorrect, filename, potentialC
 						#Mark this peptide as uncorrected / uncorrectable.
 						newComputation <- TRUE
 						results$alphaResults[peptide] <- list(c())
-						results$peptideResults[peptide] <- list(c())
+						results$peptideResults[[peptide]] <- rep(as.numeric(NA), nrow(ruvInputData))
+						names(results$peptideResults[[peptide]]) <- rownames(ruvInputDataWithoutNA)
 						if(withW) results$W[peptide] <- list(c())
 						next
 					}
@@ -88,7 +115,8 @@ RUVIII_C_Varying <- function(k, ruvInputData, M, toCorrect, filename, potentialC
 					{
 						newComputation <- TRUE
 						results$alphaResults[peptide] <- list(c())
-						results$peptideResults[peptide] <- list(c())
+						results$peptideResults[[peptide]] <- rep(as.numeric(NA), nrow(ruvInputData))
+						names(results$peptideResults[[peptide]]) <- rownames(ruvInputDataWithoutNA)
 						if(withW) results$W[peptide] <- list(c())
 						next
 					}
@@ -119,7 +147,8 @@ RUVIII_C_Varying <- function(k, ruvInputData, M, toCorrect, filename, potentialC
 				{
 					newComputation <- TRUE
 					results$alphaResults[peptide] <- list(c())
-					results$peptideResults[peptide] <- list(c())
+					results$peptideResults[[peptide]] <- rep(as.numeric(NA), nrow(ruvInputData))
+					names(results$peptideResults[[peptide]]) <- rownames(ruvInputDataWithoutNA)
 					if(withW) results$W[peptide] <- list(c())
 				}
 			}
@@ -128,11 +157,12 @@ RUVIII_C_Varying <- function(k, ruvInputData, M, toCorrect, filename, potentialC
 			{
 				newComputation <- TRUE
 				results$alphaResults[peptide] <- list(c())
-				results$peptideResults[peptide] <- list(c())
+				results$peptideResults[[peptide]] <- rep(as.numeric(NA), nrow(ruvInputData))
+				names(results$peptideResults[[peptide]]) <- rownames(ruvInputDataWithoutNA)
 				if(withW) results$W[peptide] <- list(c())
 			}
 			#If we've hit the batch size, and we've actually made a new computation, write out to the temporary file. 
-			if(peptideIndex %% batchSize == 0 && newComputation)
+			if(peptideIndex %% batchSize == 0 && newComputation && !is.null(filename))
 			{
 				save(results, file = filename)
 			}
@@ -141,7 +171,7 @@ RUVIII_C_Varying <- function(k, ruvInputData, M, toCorrect, filename, potentialC
 		#Exit the progress bar.
 		pb$terminate()
 		#If we've made any new computations write out to file. 
-		if(newComputation) save(results, file = filename)
+		if(newComputation && !is.null(filename)) save(results, file = filename)
 	}
 	if(withW)
 	{

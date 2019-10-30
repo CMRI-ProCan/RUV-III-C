@@ -16,19 +16,15 @@ RUVIII_C_CPP <- function(input, k, M, controls, toCorrect, withW) {
 	}
     	.Call('_RUVIIIC_RUVIIIC', PACKAGE = 'RUVIIIC', input, k, M, controls, toCorrect, withW)
 }
-RUVIII_C_Varying_CPP <- function(input, k, M, controls, toCorrect, withW) {
-        if(any(is.na(input[, controls])))
-        {
-                stop("The negative control variables should never be NA")
-        }
+RUVIII_C_Varying_CPP <- function(input, k, M, potentialControls, toCorrect, withW) {
 	if(k >= nrow(input))
 	{
 		stop("Input k cannot be larger than the number of rows in the input matrix")
 	}
-	if(k >= length(controls))
+	if(k >= length(potentialControls))
 	{
 		stop("Input k cannot be larger than the number of negative controls")
 	}
-    	.Call('_RUVIIIC_RUVIIIC_Varying', PACKAGE = 'RUVIIIC', input, k, M, controls, toCorrect, withW)
+    	.Call('_RUVIIIC_RUVIIIC_Varying', PACKAGE = 'RUVIIIC', input, k, M, potentialControls, toCorrect, withW)
 }
 

@@ -61,7 +61,11 @@ Rcpp::NumericMatrix RUVIIIC_Varying(Rcpp::NumericMatrix input, int k, Rcpp::Nume
 		//Matrix used to extract the effects on the control variables
 		Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::ColMajor> ac(nRows, controlIndices.size());
 
+		//The indices of the negative control variables used, to normalize the current variable
 		std::vector<int> controlIndicesThisVariable;
+		//The indices of the rows for which the target variable has non-missing values
+		std::vector<int> nonMissingIndices;
+
 		//The number of rows copied into the submatrix
 		int nSubmatrixRows;
 		#pragma omp for
@@ -75,15 +79,17 @@ Rcpp::NumericMatrix RUVIIIC_Varying(Rcpp::NumericMatrix input, int k, Rcpp::Nume
 			int columnIndexWithinInput = std::distance(dataMatrixColumnNames.begin(), std::find(dataMatrixColumnNames.begin(), dataMatrixColumnNames.end(), currentToCorrect));
 			//This is going to count how many rows of the data matrix we're keeping
 			nSubmatrixRows = 0;
+			nonMissingIndices.clear();
 			for(int row = 0; row < nRows; row++)
 			{
-				if(input(row, columnIndexWithinInput) == input(row, columnIndexWithinInput))
+				if(inputAsEigen(row, columnIndexWithinInput) == inputAsEigen(row, columnIndexWithinInput))
 				{
 					//Copy row of data matrix
 					submatrixData.row(nSubmatrixRows) = inputAsRowMajorImputed.row(row);
 					//copy row of M
 					submatrixM.row(nSubmatrixRows) = MAsEigen.row(row);
 					nSubmatrixRows++;
+					nonMissingIndices.push_back(row);
 				}
 			}
 			//Create a block view of submatrixData, accounting for th efact that we're not using some of the rows. 
@@ -95,7 +101,7 @@ Rcpp::NumericMatrix RUVIIIC_Varying(Rcpp::NumericMatrix input, int k, Rcpp::Nume
 				bool useThisControl = true;
 				for(int row = 0; row < nSubmatrixRows; row++)
 				{
-					if(submatrixDataView(row, potentialControlIndex) != submatrixDataView(row, potentialControlIndex))
+					if(inputAsEigen(nonMissingIndices[row], potentialControlIndex) != inputAsEigen(nonMissingIndices[row], potentialControlIndex))
 					{
 						useThisControl = false;
 						break;

@@ -14,14 +14,14 @@ test_that("Test simple scenario 1",
 		M <- data.matrix(M)
 		#Set 30 values in the first 15 columns to NA
 		data[sample(1:(15*20), 30)] <- NA
-		for(toCorrect in 1:13)
+		for(toCorrect in 1:14)
 		{
 			cppImplementation <- RUVIIIC:::RUVIII_C_CPP(input = data, k = 1, M = M, controls = as.character(16:20), toCorrect = as.character(toCorrect:(toCorrect+1)), withW = FALSE)
 			rImplementation <- RUVIIIC:::RUVIII_C_R(ruvInputData = data, k = 1, M = M, controls = as.character(16:20), toCorrect = as.character(toCorrect:(toCorrect + 1)), withW = FALSE, filename = NULL)
 			expect_equal(cppImplementation, rImplementation)
 			expect_less_than(max(abs(cppImplementation - rImplementation), na.rm=TRUE), 1e-8)
 		}
-		for(toCorrect in 1:13)
+		for(toCorrect in 1:14)
 		{
 			cppImplementation <- RUVIIIC:::RUVIII_C_CPP(input = data, k = 2, M = M, controls = as.character(16:20), toCorrect = as.character(toCorrect:(toCorrect+1)), withW = FALSE)
 			rImplementation <- RUVIIIC:::RUVIII_C_R(ruvInputData = data, k = 2, M = M, controls = as.character(16:20), toCorrect = as.character(toCorrect:(toCorrect + 1)), withW = FALSE, filename = NULL)

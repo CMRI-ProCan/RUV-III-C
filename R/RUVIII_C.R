@@ -133,7 +133,8 @@ RUVIII_C_R <- function(k, ruvInputData, M, toCorrect, filename, controls, withW 
 						#Mark this peptide as uncorrected / uncorrectable.
 						newComputation <- TRUE
 						results$alphaResults[peptide] <- list(c())
-						results$peptideResults[peptide] <- list(c())
+						results$peptideResults[[peptide]] <- rep(as.numeric(NA), nrow(ruvInputData))
+						names(results$peptideResults[[peptide]]) <- rownames(ruvInputDataWithoutNA)
 						if(withW) results$W[peptide] <- list(c())
 						next
 					}
@@ -179,7 +180,8 @@ RUVIII_C_R <- function(k, ruvInputData, M, toCorrect, filename, controls, withW 
 				{
 					newComputation <- TRUE
 					results$alphaResults[peptide] <- list(c())
-					results$peptideResults[peptide] <- list(c())
+					results$peptideResults[[peptide]] <- rep(as.numeric(NA), nrow(ruvInputData))
+					names(results$peptideResults[[peptide]]) <- rownames(ruvInputDataWithoutNA)
 					if(withW) results$W[peptide] <- list(c())
 				}
 			}
@@ -188,7 +190,8 @@ RUVIII_C_R <- function(k, ruvInputData, M, toCorrect, filename, controls, withW 
 			{
 				newComputation <- TRUE
 				results$alphaResults[peptide] <- list(c())
-				results$peptideResults[peptide] <- list(c())
+				results$peptideResults[[peptide]] <- rep(as.numeric(NA), nrow(ruvInputData))
+				names(results$peptideResults[[peptide]]) <- rownames(ruvInputDataWithoutNA)
 				if(withW) results$W[peptide] <- list(c())
 			}
 			#If we've hit the batch size, and we've actually made a new computation, write out to the temporary file. 

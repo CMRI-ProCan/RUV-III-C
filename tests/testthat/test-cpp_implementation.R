@@ -129,4 +129,28 @@ test_that("Test that there was nothing special about numeric column names",
 			expect_less_than(max(abs(cppImplementation - rImplementation), na.rm=TRUE), 1e-8)
 		}
 	  })
+test_that("Test when some peptides can be corrected, and some can't", 
+	  {
+		set.seed(3)
+	  	#Random data, 20 x 20
+		data <- rnorm(n = 20*20)
+		dim(data) <- c(20, 20)
 
+		M <- data.frame(rep = factor(rep(1:10, each = 2)))
+		M <- model.matrix(~ rep - 1, data = M)
+		M <- data.matrix(M)
+	
+		#Almost all the values for the first 4 peptides are missing
+		data[1:18, 1:4] <- NA
+
+		#NAs are now in columns named 6:20
+		colnames(data) <- paste0("C", 1:20)
+		rownames(data) <- paste0("C", 1:20)
+		for(toCorrect in 1:19)
+		{
+			cppImplementation <- RUVIIIC:::RUVIII_C_CPP(input = data, k = 3, M = M, controls = paste0("C", 17:20), toCorrect = paste0("C", toCorrect:(toCorrect+1)), withW = FALSE)
+			rImplementation <- RUVIIIC:::RUVIII_C_R(ruvInputData = data, k = 3, M = M, controls = paste0("C", 17:20), toCorrect = paste0("C", toCorrect:(toCorrect + 1)), withW = FALSE, filename = NULL)
+			expect_equal(cppImplementation, rImplementation)
+			expect_less_than(max(abs(cppImplementation - rImplementation), na.rm=TRUE), 1e-8)
+		}
+	  })

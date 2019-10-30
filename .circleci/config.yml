@@ -1,8 +1,6 @@
 version: 2
 
 variables:
-  linux: &linux
-
   build: &build
     run:
       command: |
@@ -19,7 +17,6 @@ variables:
 
 jobs:
   build-linux:
-    <<: *linux
     steps:
       - *common
       - checkout

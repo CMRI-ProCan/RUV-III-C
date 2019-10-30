@@ -27,6 +27,11 @@ Rcpp::NumericMatrix RUVIIIC(Rcpp::NumericMatrix input, int k, Rcpp::NumericMatri
 	{
 		controlIndices.push_back((int)std::distance(dataMatrixColumnNames.begin(), std::find(dataMatrixColumnNames.begin(), dataMatrixColumnNames.end(), control)));
 	}
+	std::vector<std::string> toCorrectNames;
+	for(int i = 0; i < nCorrections; i++)
+	{
+		toCorrectNames.push_back(Rcpp::as<std::string>(toCorrect[i]));
+	}
 
 	//Create an Eigen view of the matrix
 	Eigen::Map<Eigen::MatrixXd> inputAsEigen(Rcpp::as<Eigen::Map<Eigen::MatrixXd> >(input));
@@ -64,7 +69,7 @@ Rcpp::NumericMatrix RUVIIIC(Rcpp::NumericMatrix input, int k, Rcpp::NumericMatri
 			//If there's been an error somewhere, just NOP out the rest of the loop iterations
 			if (foundError) continue;
 			//The name of the column we are currently trying to correct
-			std::string currentToCorrect = Rcpp::as<std::string>(toCorrect[i]);
+			std::string currentToCorrect = toCorrectNames[i];
 			//The index of that column within the data matrix
 			int columnIndexWithinInput = std::distance(dataMatrixColumnNames.begin(), std::find(dataMatrixColumnNames.begin(), dataMatrixColumnNames.end(), currentToCorrect));
 			//This is going to count how many rows of the data matrix we're keeping

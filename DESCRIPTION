@@ -8,6 +8,8 @@ Maintainer: Rohan Shah <rshah@cmri.org.au>
 Description: Variations of RUV-III which perform normalisation based only on the non-missing values. Originally designed for SWATH-MS proteomics datasets. 
 License: GPL-3
 LazyLoad: yes
+LinkingTo: Rcpp, RcppEigen, RSpectra
+Imports: Rcpp
 Depends: 
     R (>= 3.4),
     RSpectra,
@@ -18,4 +20,5 @@ Collate:
     'RUVIII_C.R'
     'data.R'
     'roxygen.R'
+    'RcppExports.R'
 RoxygenNote: 6.1.1

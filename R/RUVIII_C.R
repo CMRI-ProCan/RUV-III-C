@@ -123,6 +123,7 @@ RUVIII_C <- function(k, ruvInputData, M, toCorrect, filename, controls, withW = 
 						next
 					}
 					try({
+						browser()
 						#Now the RUV-III code. This may throw exceptions, possibly for numerical reasons, hence the try / catch. 
 						eigenDecomp <- eigs_sym(Y0 %*% t(Y0), k = min(m - ncol(Msubset), length(controls)), which = "LM")
 						fullalpha <- t(eigenDecomp$vectors) %*% submatrix

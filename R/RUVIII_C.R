@@ -10,13 +10,13 @@
 #' 
 #' RUV-III-C is a variation of RUV-III that attempts to solve this problem, by applying RUV-III separately to every variable. If variable X is being corrected, we take the rows of the data matrix for which X is non-missing. RUV-III is then applied, and the corrected values of X is retained. The corrected values of all other variables are discarded. Note that when we take a subset of the rows of the data matrix, other columns besides X will still have missing values. These values are replaced with zero in order to apply RUV-III. No additional transformation is applied to the input data matrix. If normalization should be applied on the log-scale, then logged data must be input. 
 #'
-#' This function takes an intermediate filename, used to store the results. If the function is run again, the previously computed results are loaded directly from the intermediate file, without checking if the inputs specified to the function are the same as those used to generate the previous intermediate result. To re-run a computation, the intermediate file must be deleted. 
+#' This function takes an optional intermediate filename, used to store the results. If the function is run again, the previously computed results are loaded directly from the intermediate file, without checking if the inputs specified to the function are the same as those used to generate the previous intermediate result. To re-run a computation, the intermediate file must be deleted. If the intermediate filename is set to NULL, no intermediate file is used. 
 #' 
 #' @param k The number of factors of unwanted variation to remove
 #' @param ruvInputData The input data matrix. Must be a matrix, not a data.frame. It should contain missing (NA) values, rather than zeros. No additional transformation is applied to the input data. 
 #' @param M The design matrix containing information about technical replicates. It should not contain an intercept term!
 #' @param toCorrect The names of the variables to correct using RUV-III-C
-#' @param filename The intermediate file in which to save the results. 
+#' @param filename The intermediate file in which to save the results. Set to NULL to not use an intermediate file. 
 #' @param controls The names of the control variables which are known to be constant across the observations
 #' @param withW Should we keep the estimate of the unwanted variation factors W, for each variable which is corrected?
 #' @param batchSize How often should we write to the intermediate file? The default of 1000 implies that results are written to file every 1000 variables. 
@@ -72,7 +72,7 @@ RUVIII_C <- function(k, ruvInputData, M, toCorrect, filename, controls, withW = 
 	results$peptideResults <- results$alphaResults <- results$W <- list()
 
 	#Load previous results set. 
-	if(file.exists(filename))
+	if(!is.null(filename) && file.exists(filename))
 	{
 		load(filename)
 	}
@@ -163,7 +163,7 @@ RUVIII_C <- function(k, ruvInputData, M, toCorrect, filename, controls, withW = 
 				if(withW) results$W[peptide] <- list(c())
 			}
 			#If we've hit the batch size, and we've actually made a new computation, write out to the temporary file. 
-			if(peptideIndex %% batchSize == 0 && newComputation)
+			if(peptideIndex %% batchSize == 0 && newComputation && !is.null(filename))
 			{
 				save(results, file = filename)
 			}
@@ -172,7 +172,7 @@ RUVIII_C <- function(k, ruvInputData, M, toCorrect, filename, controls, withW = 
 		#Exit the progress bar.
 		pb$terminate()
 		#If we've made any new computations write out to file. 
-		if(newComputation) save(results, file = filename)
+		if(newComputation && !is.null(filename)) save(results, file = filename)
 	}
 	if(withW)
 	{

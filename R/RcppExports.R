@@ -6,6 +6,14 @@ RUVIIIC_CPP <- function(input, k, M, controls, toCorrect, withW) {
         {
                 stop("The negative control variables should never be NA")
         }
+	if(k >= nrow(input))
+	{
+		stop("Input k cannot be larger than the number of rows in the input matrix")
+	}
+	if(k >= length(controls))
+	{
+		stop("Input k cannot be larger than the number of negative controls")
+	}
     	.Call('_RUVIIIC_RUVIIIC', PACKAGE = 'RUVIIIC', input, k, M, controls, toCorrect, withW)
 }
 

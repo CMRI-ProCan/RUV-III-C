@@ -68,6 +68,14 @@ RUVIII_C <- function(k, ruvInputData, M, toCorrect, filename, controls, withW = 
 	{
 		stop("The negative control variables should never be NA")
 	}
+	if(k >= nrow(ruvInputData))
+	{
+		stop("Input k cannot be larger than the number of rows in the input matrix")
+	}
+	if(k >= length(controls))
+	{
+		stop("Input k cannot be larger than the number of negative controls")
+	}
 	#Replace NAs with 0
 	ruvInputDataWithoutNA <- ruvInputData
 	ruvInputDataWithoutNA[is.na(ruvInputDataWithoutNA)] <- 0

@@ -3,7 +3,7 @@ version: 2
 variables:
   linux: &linux
     docker:
-      - image: r-base
+      - image: cmriprocan/cci-ruviii_c-docker-primary:3.6.1
 
   build: &build
     run:

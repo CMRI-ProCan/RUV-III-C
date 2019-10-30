@@ -8,7 +8,7 @@ variables:
   build: &build
     run:
       command: |
-        R -e "install.packages('RSpectra', 'progress', 'ruv')" \
+        R -e "install.packages(c('RSpectra', 'progress', 'ruv'))" \
         && R CMD INSTALL ./ruviii_c
 
   common: &common

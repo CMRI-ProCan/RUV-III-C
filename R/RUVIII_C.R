@@ -10,16 +10,19 @@
 #' 
 #' RUV-III-C is a variation of RUV-III that attempts to solve this problem, by applying RUV-III separately to every variable. If variable X is being corrected, we take the rows of the data matrix for which X is non-missing. RUV-III is then applied, and the corrected values of X is retained. The corrected values of all other variables are discarded. Note that when we take a subset of the rows of the data matrix, other columns besides X will still have missing values. These values are replaced with zero in order to apply RUV-III. No additional transformation is applied to the input data matrix. If normalization should be applied on the log-scale, then logged data must be input. 
 #'
-#' This function takes an optional intermediate filename, used to store the results. If the function is run again, the previously computed results are loaded directly from the intermediate file, without checking if the inputs specified to the function are the same as those used to generate the previous intermediate result. To re-run a computation, the intermediate file must be deleted. If the intermediate filename is set to NULL, no intermediate file is used. 
+#' There are two implementations of this function, one in C++ and one in R. Select which version using the \code{version} argument, which must be either "CPP" or "R"
+#' 
+#' The R implementation of this function takes an optional intermediate filename, used to store the results. If the function is run again, the previously computed results are loaded directly from the intermediate file, without checking if the inputs specified to the function are the same as those used to generate the previous intermediate result. To re-run a computation, the intermediate file must be deleted. If the intermediate filename is set to NULL, no intermediate file is used. The C++ implementation never saves an intermediate file. 
 #' 
 #' @param k The number of factors of unwanted variation to remove
 #' @param ruvInputData The input data matrix. Must be a matrix, not a data.frame. It should contain missing (NA) values, rather than zeros. No additional transformation is applied to the input data. 
 #' @param M The design matrix containing information about technical replicates. It should not contain an intercept term!
 #' @param toCorrect The names of the variables to correct using RUV-III-C
-#' @param filename The intermediate file in which to save the results. Set to NULL to not use an intermediate file. 
+#' @param filename The intermediate file in which to save the results, in the R version. Set to NULL to not use an intermediate file. The C++ version never saves an intermediate file. 
 #' @param controls The names of the control variables which are known to be constant across the observations
 #' @param withW Should we keep the estimate of the unwanted variation factors W, for each variable which is corrected?
 #' @param batchSize How often should we write to the intermediate file? The default of 1000 implies that results are written to file every 1000 variables. 
+#' @param version The version of the underlying code to use. Must be either "CPP" or "R"
 #'
 #' @return If withW = FALSE, returns a matrix. If withW = TRUE, returns a list with entries named \code{newY} and \code{W}.
 #'
@@ -40,9 +43,24 @@
 #' #Because there are so many potential controls here, we only use 500. 
 #' actualControls <- head(potentialControlsAlwaysFound, 500)
 #' #Actually run correction
-#' \dontrun{results <- RUVIII_C(k = 11, ruvInputData = onlyPeptideData, M = M, toCorrect = c(sisPeptides, actualControls), controls = actualControls, filename = "results.RData")}
+#' \dontrun{results <- RUVIII_C_R(k = 11, ruvInputData = onlyPeptideData, M = M, toCorrect = c(sisPeptides, actualControls), controls = actualControls, filename = "results.RData")}
 #' @export
-RUVIII_C <- function(k, ruvInputData, M, toCorrect, filename, controls, withW = FALSE, batchSize = 1000)
+RUVIII_C <- function(k, ruvInputData, M, toCorrect, filename, controls, withW = FALSE, batchSize = 1000, version = "CPP")
+{
+	if(version == "CPP")
+	{
+		return(RUVIII_C_CPP(k = k, input = ruvInputData, M = M, toCorrect = toCorrect, controls = controls, withW = withW))
+	}
+	else if(version == "R")
+	{
+		return(RUVIII_C_R(k = k, ruvInputData = ruvInputData, M = M, toCorrect = toCorrect, filename = filename, controls = controls, withW = withW, batchSize = batchSize))
+	}
+	else
+	{
+		stop("version must be either 'CPP' or 'R'")
+	}
+}
+RUVIII_C_R <- function(k, ruvInputData, M, toCorrect, filename, controls, withW = FALSE, batchSize = 1000)
 {
 	if(missing(filename))
 	{

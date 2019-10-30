@@ -16,15 +16,17 @@ test_that("Test simple scenario 1",
 		data[sample(1:(15*20), 30)] <- NA
 		for(toCorrect in 1:13)
 		{
-			cppImplementation <- RUVIIIC:::RUVIIIC_CPP(input = data, k = 1, M = M, controls = as.character(16:20), toCorrect = as.character(toCorrect:(toCorrect+1)), withW = FALSE)
-			rImplementation <- RUVIIIC:::RUVIII_C(ruvInputData = data, k = 1, M = M, controls = as.character(16:20), toCorrect = as.character(toCorrect:(toCorrect + 1)), withW = FALSE, filename = NULL)
+			cppImplementation <- RUVIIIC:::RUVIII_C_CPP(input = data, k = 1, M = M, controls = as.character(16:20), toCorrect = as.character(toCorrect:(toCorrect+1)), withW = FALSE)
+			rImplementation <- RUVIIIC:::RUVIII_C_R(ruvInputData = data, k = 1, M = M, controls = as.character(16:20), toCorrect = as.character(toCorrect:(toCorrect + 1)), withW = FALSE, filename = NULL)
 			expect_equal(cppImplementation, rImplementation)
+			expect_less_than(max(abs(cppImplementation - rImplementation), na.rm=TRUE), 1e-8)
 		}
 		for(toCorrect in 1:13)
 		{
-			cppImplementation <- RUVIIIC:::RUVIIIC_CPP(input = data, k = 2, M = M, controls = as.character(16:20), toCorrect = as.character(toCorrect:(toCorrect+1)), withW = FALSE)
-			rImplementation <- RUVIIIC:::RUVIII_C(ruvInputData = data, k = 2, M = M, controls = as.character(16:20), toCorrect = as.character(toCorrect:(toCorrect + 1)), withW = FALSE, filename = NULL)
+			cppImplementation <- RUVIIIC:::RUVIII_C_CPP(input = data, k = 2, M = M, controls = as.character(16:20), toCorrect = as.character(toCorrect:(toCorrect+1)), withW = FALSE)
+			rImplementation <- RUVIIIC:::RUVIII_C_R(ruvInputData = data, k = 2, M = M, controls = as.character(16:20), toCorrect = as.character(toCorrect:(toCorrect + 1)), withW = FALSE, filename = NULL)
 			expect_equal(cppImplementation, rImplementation)
+			expect_less_than(max(abs(cppImplementation - rImplementation), na.rm=TRUE), 1e-8)
 		}
 	  })
 #Same as test 1, but reverse column order
@@ -47,15 +49,17 @@ test_that("Test simple scenario 2",
 		data <- data[, 20:1]
 		for(toCorrect in 1:19)
 		{
-			cppImplementation <- RUVIIIC:::RUVIIIC_CPP(input = data, k = 1, M = M, controls = as.character(16:20), toCorrect = as.character(toCorrect:(toCorrect+1)), withW = FALSE)
-			rImplementation <- RUVIIIC:::RUVIII_C(ruvInputData = data, k = 1, M = M, controls = as.character(16:20), toCorrect = as.character(toCorrect:(toCorrect + 1)), withW = FALSE, filename = NULL)
+			cppImplementation <- RUVIIIC:::RUVIII_C_CPP(input = data, k = 1, M = M, controls = as.character(16:20), toCorrect = as.character(toCorrect:(toCorrect+1)), withW = FALSE)
+			rImplementation <- RUVIIIC:::RUVIII_C_R(ruvInputData = data, k = 1, M = M, controls = as.character(16:20), toCorrect = as.character(toCorrect:(toCorrect + 1)), withW = FALSE, filename = NULL)
 			expect_equal(cppImplementation, rImplementation)
+			expect_less_than(max(abs(cppImplementation - rImplementation), na.rm=TRUE), 1e-8)
 		}
 		for(toCorrect in 1:19)
 		{
-			cppImplementation <- RUVIIIC:::RUVIIIC_CPP(input = data, k = 2, M = M, controls = as.character(16:20), toCorrect = as.character(toCorrect:(toCorrect+1)), withW = FALSE)
-			rImplementation <- RUVIIIC:::RUVIII_C(ruvInputData = data, k = 2, M = M, controls = as.character(16:20), toCorrect = as.character(toCorrect:(toCorrect + 1)), withW = FALSE, filename = NULL)
+			cppImplementation <- RUVIIIC:::RUVIII_C_CPP(input = data, k = 2, M = M, controls = as.character(16:20), toCorrect = as.character(toCorrect:(toCorrect+1)), withW = FALSE)
+			rImplementation <- RUVIIIC:::RUVIII_C_R(ruvInputData = data, k = 2, M = M, controls = as.character(16:20), toCorrect = as.character(toCorrect:(toCorrect + 1)), withW = FALSE, filename = NULL)
 			expect_equal(cppImplementation, rImplementation)
+			expect_less_than(max(abs(cppImplementation - rImplementation), na.rm=TRUE), 1e-8)
 		}
 	  })
 #Same as test 2, but with the column names still 1 -> 20
@@ -79,15 +83,17 @@ test_that("Test simple scenario 3",
 		rownames(data) <- 1:20
 		for(toCorrect in 1:19)
 		{
-			cppImplementation <- RUVIIIC:::RUVIIIC_CPP(input = data, k = 1, M = M, controls = as.character(1:5), toCorrect = as.character(toCorrect:(toCorrect+1)), withW = FALSE)
-			rImplementation <- RUVIIIC:::RUVIII_C(ruvInputData = data, k = 1, M = M, controls = as.character(1:5), toCorrect = as.character(toCorrect:(toCorrect + 1)), withW = FALSE, filename = NULL)
+			cppImplementation <- RUVIIIC:::RUVIII_C_CPP(input = data, k = 1, M = M, controls = as.character(1:5), toCorrect = as.character(toCorrect:(toCorrect+1)), withW = FALSE)
+			rImplementation <- RUVIIIC:::RUVIII_C_R(ruvInputData = data, k = 1, M = M, controls = as.character(1:5), toCorrect = as.character(toCorrect:(toCorrect + 1)), withW = FALSE, filename = NULL)
 			expect_equal(cppImplementation, rImplementation)
+			expect_less_than(max(abs(cppImplementation - rImplementation), na.rm=TRUE), 1e-8)
 		}
 		for(toCorrect in 1:19)
 		{
-			cppImplementation <- RUVIIIC:::RUVIIIC_CPP(input = data, k = 2, M = M, controls = as.character(1:5), toCorrect = as.character(toCorrect:(toCorrect+1)), withW = FALSE)
-			rImplementation <- RUVIIIC:::RUVIII_C(ruvInputData = data, k = 2, M = M, controls = as.character(1:5), toCorrect = as.character(toCorrect:(toCorrect + 1)), withW = FALSE, filename = NULL)
+			cppImplementation <- RUVIIIC:::RUVIII_C_CPP(input = data, k = 2, M = M, controls = as.character(1:5), toCorrect = as.character(toCorrect:(toCorrect+1)), withW = FALSE)
+			rImplementation <- RUVIIIC:::RUVIII_C_R(ruvInputData = data, k = 2, M = M, controls = as.character(1:5), toCorrect = as.character(toCorrect:(toCorrect + 1)), withW = FALSE, filename = NULL)
 			expect_equal(cppImplementation, rImplementation)
+			expect_less_than(max(abs(cppImplementation - rImplementation), na.rm=TRUE), 1e-8)
 		}
 	  })
 test_that("Test that there was nothing special about numeric column names", 
@@ -110,15 +116,17 @@ test_that("Test that there was nothing special about numeric column names",
 		rownames(data) <- paste0("C", 1:20)
 		for(toCorrect in 1:19)
 		{
-			cppImplementation <- RUVIIIC:::RUVIIIC_CPP(input = data, k = 1, M = M, controls = paste0("C", 1:5), toCorrect = paste0("C", toCorrect:(toCorrect+1)), withW = FALSE)
-			rImplementation <- RUVIIIC:::RUVIII_C(ruvInputData = data, k = 1, M = M, controls = paste0("C", 1:5), toCorrect = paste0("C", toCorrect:(toCorrect + 1)), withW = FALSE, filename = NULL)
+			cppImplementation <- RUVIIIC:::RUVIII_C_CPP(input = data, k = 1, M = M, controls = paste0("C", 1:5), toCorrect = paste0("C", toCorrect:(toCorrect+1)), withW = FALSE)
+			rImplementation <- RUVIIIC:::RUVIII_C_R(ruvInputData = data, k = 1, M = M, controls = paste0("C", 1:5), toCorrect = paste0("C", toCorrect:(toCorrect + 1)), withW = FALSE, filename = NULL)
 			expect_equal(cppImplementation, rImplementation)
+			expect_less_than(max(abs(cppImplementation - rImplementation), na.rm=TRUE), 1e-8)
 		}
 		for(toCorrect in 1:19)
 		{
-			cppImplementation <- RUVIIIC:::RUVIIIC_CPP(input = data, k = 2, M = M, controls = paste0("C", 1:5), toCorrect = paste0("C", toCorrect:(toCorrect+1)), withW = FALSE)
-			rImplementation <- RUVIIIC:::RUVIII_C(ruvInputData = data, k = 2, M = M, controls = paste0("C", 1:5), toCorrect = paste0("C", toCorrect:(toCorrect + 1)), withW = FALSE, filename = NULL)
+			cppImplementation <- RUVIIIC:::RUVIII_C_CPP(input = data, k = 2, M = M, controls = paste0("C", 1:5), toCorrect = paste0("C", toCorrect:(toCorrect+1)), withW = FALSE)
+			rImplementation <- RUVIIIC:::RUVIII_C_R(ruvInputData = data, k = 2, M = M, controls = paste0("C", 1:5), toCorrect = paste0("C", toCorrect:(toCorrect + 1)), withW = FALSE, filename = NULL)
 			expect_equal(cppImplementation, rImplementation)
+			expect_less_than(max(abs(cppImplementation - rImplementation), na.rm=TRUE), 1e-8)
 		}
 	  })
 

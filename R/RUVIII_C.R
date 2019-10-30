@@ -46,7 +46,7 @@ RUVIII_C <- function(k, ruvInputData, M, toCorrect, filename, controls, withW = 
 {
 	if(missing(filename))
 	{
-		stop("Function RUVIII_NM_Varying requires a filename for intermediate results")
+		stop("Function RUVIII_NM_Varying requires a filename for intermediate results, or NULL if an intermediate file should not be used")
 	}
 	if(k <= 0)
 	{
@@ -63,6 +63,10 @@ RUVIII_C <- function(k, ruvInputData, M, toCorrect, filename, controls, withW = 
 	if(any(apply(M, 2, sum) == nrow(M)))
 	{
 		warning("Input design matrix had a column of all ones, indicating an intercept term. This is generally an error!")
+	}
+	if(any(is.na(ruvInputData[, controls])))
+	{
+		stop("The negative control variables should never be NA")
 	}
 	#Replace NAs with 0
 	ruvInputDataWithoutNA <- ruvInputData
@@ -123,7 +127,6 @@ RUVIII_C <- function(k, ruvInputData, M, toCorrect, filename, controls, withW = 
 						next
 					}
 					try({
-						browser()
 						#Now the RUV-III code. This may throw exceptions, possibly for numerical reasons, hence the try / catch. 
 						eigenDecomp <- eigs_sym(Y0 %*% t(Y0), k = min(m - ncol(Msubset), length(controls)), which = "LM")
 						fullalpha <- t(eigenDecomp$vectors) %*% submatrix

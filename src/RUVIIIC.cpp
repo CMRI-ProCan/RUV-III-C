@@ -9,6 +9,7 @@ Rcpp::NumericMatrix RUVIIIC(Rcpp::NumericMatrix input, int k, Rcpp::NumericMatri
 	//Result matrix
 	Rcpp::NumericMatrix results(input.nrow(), toCorrect.size());
 	Rcpp::colnames(results) = toCorrect;
+	Rcpp::rownames(results) = Rcpp::rownames(input);
 	//Eigen view of the results matrix
 	Eigen::Map<Eigen::MatrixXd> resultsAsEigen(Rcpp::as<Eigen::Map<Eigen::MatrixXd> >(results));
 	//Names of columns in the input

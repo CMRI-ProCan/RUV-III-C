@@ -2,6 +2,10 @@
 # Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 RUVIIIC_CPP <- function(input, k, M, controls, toCorrect, withW) {
-    .Call('_RUVIIIC_RUVIIIC', PACKAGE = 'RUVIIIC', input, k, M, controls, toCorrect, withW)
+        if(any(is.na(input[, controls])))
+        {
+                stop("The negative control variables should never be NA")
+        }
+    	.Call('_RUVIIIC_RUVIIIC', PACKAGE = 'RUVIIIC', input, k, M, controls, toCorrect, withW)
 }
 

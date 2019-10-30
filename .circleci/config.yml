@@ -9,7 +9,7 @@ variables:
     run:
       command: |
         pwd \
-        && ls \ 
+        && ls \
         && R CMD INSTALL ./ruviii_c
 
   common: &common

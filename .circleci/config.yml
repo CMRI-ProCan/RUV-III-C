@@ -8,9 +8,7 @@ variables:
   build: &build
     run:
       command: |
-        pwd \
-        && ls \
-        && R CMD INSTALL ./ruviii_c
+        R CMD INSTALL .
 
   common: &common
     run:

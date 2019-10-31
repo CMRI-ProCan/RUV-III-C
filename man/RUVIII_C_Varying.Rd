@@ -5,7 +5,8 @@
 \title{RUV-III-C, varying controls}
 \usage{
 RUVIII_C_Varying(k, ruvInputData, M, toCorrect, filename,
-  potentialControls, withW = FALSE, batchSize = 1000)
+  potentialControls, withW = FALSE, batchSize = 1000,
+  version = "CPP")
 }
 \arguments{
 \item{k}{The number of factors of unwanted variation to remove}
@@ -23,6 +24,8 @@ RUVIII_C_Varying(k, ruvInputData, M, toCorrect, filename,
 \item{withW}{Should we keep the estimate of the unwanted variation factors W, for each variable which is corrected?}
 
 \item{batchSize}{How often should we write to the intermediate file? The default of 1000 implies that results are written to file every 1000 variables.}
+
+\item{version}{The version of the underlying code to use. Must be either "CPP" or "R"}
 }
 \value{
 If withW = FALSE, returns a matrix. If withW = TRUE, returns a list with entries named \code{newY} and \code{W}.
@@ -34,4 +37,6 @@ Apply RUV-III-C, a variation of RUV-III that only uses non-missing values
 See the documentation of \link{RUVIII_C} for more information about the RUV-III-C method. This function is identical, except in this case the set of negative control variables actually used varies depending on the target variable to be normalized. Instead of putting in a list of negative control variables, the user specifies a list of potential negatve control variables.
 
 When normalizing variable X, the algorithm begins by selecting the rows of the data matrix for which X is non-missing. Out of the potential negative control peptides, it selects those that are always non-missing across the selected subset. The standard version of RUV-III is then applied, similar to \link{RUVIII_C}.
+
+There are two implementations of this function, one in C++ and one in R. Select which version using the \code{version} argument, which must be either "CPP" or "R"
 }

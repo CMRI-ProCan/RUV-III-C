@@ -17,7 +17,7 @@ variables:
   test: &test
     run:
       command: |
-        cd ${WORKSPACE}/ruviii_c/tests && R -e "source('./testthat.R')"
+        cd ${WORKSPACE}/tests && R -e "source('./testthat.R')"
 
 jobs:
   build-linux:

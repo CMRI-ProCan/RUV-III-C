@@ -52,9 +52,9 @@ RUVIII_C_Varying_R <- function(k, ruvInputData, M, toCorrect, filename, potentia
 	}
 	if(k >= nrow(ruvInputData))
 	{
-		stop("Input k cannot be larger than the number of rows in the input matrix")
+		stop("Input k cannot be larger than or equal to the number of rows in the input matrix")
 	}
-	if(k >= length(potentialControls))
+	if(k > length(potentialControls))
 	{
 		stop("Input k cannot be larger than the number of negative controls")
 	}

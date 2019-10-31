@@ -3,6 +3,19 @@
 #include <limits>
 #include <SymEigs.h>
 
+/// @brief Apply RUV-III-C
+///
+/// @param input The input data matrix to correct
+/// @param k The number of factors of unwanted variation to remove
+/// @param M The replicate matrix
+/// @param controls The names of the negative control variables
+/// @param toCorrect The names of the variables to correct
+/// @param withW Should we return the values of the W matrices for every corrected variable? Currently not implemented.
+/// 
+/// @details Written with reference to the R function RUVIIIC::RUVIII_C, which is itself based on ruv::RUVIII. See the following papers for further detail on the algorithm and parameters:
+/// 	Molania, R., Gagnon-Bartsch, J. A., Dobrovic, A., and Speed, T. P. (2019). A new normalization for Nanostring nCounter gene expression data. Nucleic Acids Research, 47(12), 6073–6083.
+///	Gagnon-Bartsch, J. A. and Speed, T. P. (2012). Using control genes to correct for unwanted variation in microarray data. Biostatistics, 13(3), 539–552.
+///	Gagnon-Bartsch, J. A., Jacob, L., and Speed, T. P. (2013). Removing unwanted variation from high dimensional data with negative controls.
 // [[Rcpp::export]]
 Rcpp::NumericMatrix RUVIIIC(Rcpp::NumericMatrix input, int k, Rcpp::NumericMatrix M, Rcpp::CharacterVector controls, Rcpp::CharacterVector toCorrect, bool withW)
 {
@@ -15,17 +28,17 @@ Rcpp::NumericMatrix RUVIIIC(Rcpp::NumericMatrix input, int k, Rcpp::NumericMatri
 	//Names of columns in the input
 	std::vector<std::string> dataMatrixColumnNames = Rcpp::as<std::vector<std::string> >(colnames(input));
 	//Number of peptides to correct
-	int nCorrections = (int)toCorrect.size();
+	int nCorrections = static_cast<int>(toCorrect.size());
 	//Number of samples in the data matrix
-	int nRows = (int)input.nrow();
-	int nColumns = (int)input.ncol();
+	int nRows = static_cast<int>(input.nrow());
+	int nColumns = static_cast<int>(input.ncol());
 
 	std::vector<std::string> controlNames = Rcpp::as<std::vector<std::string> >(controls);
 	//Indices of control variables within the input matrix
 	std::vector<int> controlIndices;
 	for(std::string control : controlNames)
 	{
-		controlIndices.push_back((int)std::distance(dataMatrixColumnNames.begin(), std::find(dataMatrixColumnNames.begin(), dataMatrixColumnNames.end(), control)));
+		controlIndices.push_back(static_cast<int>(std::distance(dataMatrixColumnNames.begin(), std::find(dataMatrixColumnNames.begin(), dataMatrixColumnNames.end(), control))));
 	}
 	std::vector<std::string> toCorrectNames;
 	for(int i = 0; i < nCorrections; i++)
@@ -43,7 +56,7 @@ Rcpp::NumericMatrix RUVIIIC(Rcpp::NumericMatrix input, int k, Rcpp::NumericMatri
 	Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> inputAsRowMajorImputed = inputAsEigen;
 
 	//And we're also going to replace NAs with 0s in this row major copy
-	inputAsRowMajorImputed = inputAsRowMajorImputed.unaryExpr([](double v){return v == v ? v : 0.0; });
+	inputAsRowMajorImputed = inputAsRowMajorImputed.unaryExpr([](double v){return std::isnan(v) ? 0.0 : v; });
 
 	//Was there an error found during the program? We need a flag, because we can't throw exceptions from inside a parallel loop
 	bool foundError = false;
@@ -76,7 +89,7 @@ Rcpp::NumericMatrix RUVIIIC(Rcpp::NumericMatrix input, int k, Rcpp::NumericMatri
 			nSubmatrixRows = 0;
 			for(int row = 0; row < nRows; row++)
 			{
-				if(input(row, columnIndexWithinInput) == input(row, columnIndexWithinInput))
+				if(!std::isnan(input(row, columnIndexWithinInput)))
 				{
 					//Copy row of data matrix
 					submatrixData.row(nSubmatrixRows) = inputAsRowMajorImputed.row(row);
@@ -101,7 +114,7 @@ Rcpp::NumericMatrix RUVIIIC(Rcpp::NumericMatrix input, int k, Rcpp::NumericMatri
 			//Create a block view of submatrixMReducedColumns, accounting for the fact that we're not using some of the columns and rows.
 			auto submatrixMReducedColumnsView = submatrixMReducedColumns.block(0, 0, nSubmatrixRows, columnsMReduced);
 			//Check if we even have enough dimensions in the matrix to remove k factors
-			if(std::min(nSubmatrixRows - columnsMReduced, (int)controls.size()) < k)
+			if(std::min(nSubmatrixRows - columnsMReduced, static_cast<int>(controls.size())) < k)
 			{
 				resultsAsEigen.col(i) = Eigen::VectorXd::Constant(nRows, std::numeric_limits<double>::quiet_NaN());
 				continue;
@@ -135,28 +148,25 @@ Rcpp::NumericMatrix RUVIIIC(Rcpp::NumericMatrix input, int k, Rcpp::NumericMatri
 			{
 				//get out the eigenvectors
 				Eigen::MatrixXd eigenVectors = eigs.eigenvectors();
-				//Get out fullalpha - effects on all the variables
+				//Get out alpha - effects on all the variables
 				Eigen::MatrixXd alpha = eigenVectors.transpose() * submatrixDataView;
-				//Reduce fullalpha to effects of just k factors on all the variables
-				//auto alpha = fullalpha.block(0, 0, std::min(k, (int)fullalpha.rows()), fullalpha.cols());
 				//We need a view, to account for the fact that we're only using part of ac
 				auto acView = ac.block(0, 0, alpha.rows(), controlIndices.size());
 				//We need a view, to account for the fact that we're only using part of submatrixDataControls
 				auto submatrixDataControlsView = submatrixDataControls.block(0, 0, nSubmatrixRows, controlIndices.size());
 				//Further subset fullalpha, looking at just the columns corresponding to the control variables
-				for(int controlCounter = 0; controlCounter < (int)controlIndices.size(); controlCounter++)
+				for(int controlCounter = 0; controlCounter < static_cast<int>(controlIndices.size()); controlCounter++)
 				{
 					acView.col(controlCounter) = alpha.col(controlIndices[controlCounter]);
 					submatrixDataControlsView.col(controlCounter) = submatrixDataView.col(controlIndices[controlCounter]);
 				}
 				auto currentPeptideW = submatrixDataControlsView * acView.transpose() * (acView * acView.transpose()).inverse();
-				//Now store the results. We're putting the results back into the correct places in the results matrix.
 				auto corrected = submatrixDataView.col(columnIndexWithinInput) - currentPeptideW * alpha.col(columnIndexWithinInput);
 				//Now store the results. We're putting the results back into the correct places in the results matrix.
 				int correctedCounter = 0;
 				for(int row = 0; row < nRows; row++)
 				{
-					if(input(row, columnIndexWithinInput) != input(row, columnIndexWithinInput))
+					if(std::isnan(input(row, columnIndexWithinInput)))
 					{
 						resultsAsEigen(row, i) = std::numeric_limits<double>::quiet_NaN();
 					}

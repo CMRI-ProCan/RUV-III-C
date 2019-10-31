@@ -19,14 +19,16 @@ test_that("Test simple scenario 1",
 			cppImplementation <- RUVIIIC:::RUVIII_C_Varying_CPP(input = data, k = 1, M = M, potentialControls = as.character(11:20), toCorrect = as.character(toCorrect:(toCorrect+1)), withW = FALSE)
 			rImplementation <- RUVIIIC:::RUVIII_C_Varying_R(ruvInputData = data, k = 1, M = M, potentialControls = as.character(11:20), toCorrect = as.character(toCorrect:(toCorrect + 1)), withW = FALSE, filename = NULL)
 			expect_equal(cppImplementation, rImplementation)
-			expect_less_than(max(abs(cppImplementation - rImplementation), na.rm=TRUE), 1e-8)
+			expect_identical(is.na(cppImplementation), is.na(rImplementation))
+			if(!all(is.na(cppImplementation))) expect_lt(max(abs(cppImplementation - rImplementation), na.rm=TRUE), 1e-8)
 		}
 		for(toCorrect in 1:19)
 		{
 			cppImplementation <- RUVIIIC:::RUVIII_C_Varying_CPP(input = data, k = 2, M = M, potentialControls = as.character(11:20), toCorrect = as.character(toCorrect:(toCorrect+1)), withW = FALSE)
 			rImplementation <- RUVIIIC:::RUVIII_C_Varying_R(ruvInputData = data, k = 2, M = M, potentialControls = as.character(11:20), toCorrect = as.character(toCorrect:(toCorrect + 1)), withW = FALSE, filename = NULL)
 			expect_equal(cppImplementation, rImplementation)
-			expect_less_than(max(abs(cppImplementation - rImplementation), na.rm=TRUE), 1e-8)
+			expect_identical(is.na(cppImplementation), is.na(rImplementation))
+			if(!all(is.na(cppImplementation))) expect_lt(max(abs(cppImplementation - rImplementation), na.rm=TRUE), 1e-8)
 		}
 	  })
 #Same as test 1, but reverse column order
@@ -52,14 +54,16 @@ test_that("Test simple scenario 2",
 			cppImplementation <- RUVIIIC:::RUVIII_C_Varying_CPP(input = data, k = 1, M = M, potentialControls = as.character(11:20), toCorrect = as.character(toCorrect:(toCorrect+1)), withW = FALSE)
 			rImplementation <- RUVIIIC:::RUVIII_C_Varying_R(ruvInputData = data, k = 1, M = M, potentialControls = as.character(11:20), toCorrect = as.character(toCorrect:(toCorrect + 1)), withW = FALSE, filename = NULL)
 			expect_equal(cppImplementation, rImplementation)
-			expect_less_than(max(abs(cppImplementation - rImplementation), na.rm=TRUE), 1e-8)
+			expect_identical(is.na(cppImplementation), is.na(rImplementation))
+			if(!all(is.na(cppImplementation))) expect_lt(max(abs(cppImplementation - rImplementation), na.rm=TRUE), 1e-8)
 		}
 		for(toCorrect in 1:19)
 		{
 			cppImplementation <- RUVIIIC:::RUVIII_C_Varying_CPP(input = data, k = 2, M = M, potentialControls = as.character(11:20), toCorrect = as.character(toCorrect:(toCorrect+1)), withW = FALSE)
 			rImplementation <- RUVIIIC:::RUVIII_C_Varying_R(ruvInputData = data, k = 2, M = M, potentialControls = as.character(11:20), toCorrect = as.character(toCorrect:(toCorrect + 1)), withW = FALSE, filename = NULL)
 			expect_equal(cppImplementation, rImplementation)
-			expect_less_than(max(abs(cppImplementation - rImplementation), na.rm=TRUE), 1e-8)
+			expect_identical(is.na(cppImplementation), is.na(rImplementation))
+			if(!all(is.na(cppImplementation))) expect_lt(max(abs(cppImplementation - rImplementation), na.rm=TRUE), 1e-8)
 		}
 	  })
 #Same as test 2, but with the column names still 1 -> 20
@@ -86,14 +90,16 @@ test_that("Test simple scenario 3",
 			cppImplementation <- RUVIIIC:::RUVIII_C_Varying_CPP(input = data, k = 1, M = M, potentialControls = as.character(1:9), toCorrect = as.character(toCorrect:(toCorrect+1)), withW = FALSE)
 			rImplementation <- RUVIIIC:::RUVIII_C_Varying_R(ruvInputData = data, k = 1, M = M, potentialControls = as.character(1:9), toCorrect = as.character(toCorrect:(toCorrect + 1)), withW = FALSE, filename = NULL)
 			expect_equal(cppImplementation, rImplementation)
-			expect_less_than(max(abs(cppImplementation - rImplementation), na.rm=TRUE), 1e-8)
+			expect_identical(is.na(cppImplementation), is.na(rImplementation))
+			if(!all(is.na(cppImplementation))) expect_lt(max(abs(cppImplementation - rImplementation), na.rm=TRUE), 1e-8)
 		}
 		for(toCorrect in 1:19)
 		{
 			cppImplementation <- RUVIIIC:::RUVIII_C_Varying_CPP(input = data, k = 2, M = M, potentialControls = as.character(1:9), toCorrect = as.character(toCorrect:(toCorrect+1)), withW = FALSE)
 			rImplementation <- RUVIIIC:::RUVIII_C_Varying_R(ruvInputData = data, k = 2, M = M, potentialControls = as.character(1:9), toCorrect = as.character(toCorrect:(toCorrect + 1)), withW = FALSE, filename = NULL)
 			expect_equal(cppImplementation, rImplementation)
-			expect_less_than(max(abs(cppImplementation - rImplementation), na.rm=TRUE), 1e-8)
+			expect_identical(is.na(cppImplementation), is.na(rImplementation))
+			if(!all(is.na(cppImplementation))) expect_lt(max(abs(cppImplementation - rImplementation), na.rm=TRUE), 1e-8)
 		}
 	  })
 test_that("Test that there was nothing special about numeric column names", 
@@ -119,14 +125,16 @@ test_that("Test that there was nothing special about numeric column names",
 			cppImplementation <- RUVIIIC:::RUVIII_C_Varying_CPP(input = data, k = 1, M = M, potentialControls = paste0("C", 1:9), toCorrect = paste0("C", toCorrect:(toCorrect+1)), withW = FALSE)
 			rImplementation <- RUVIIIC:::RUVIII_C_Varying_R(ruvInputData = data, k = 1, M = M, potentialControls = paste0("C", 1:9), toCorrect = paste0("C", toCorrect:(toCorrect + 1)), withW = FALSE, filename = NULL)
 			expect_equal(cppImplementation, rImplementation)
-			expect_less_than(max(abs(cppImplementation - rImplementation), na.rm=TRUE), 1e-8)
+			expect_identical(is.na(cppImplementation), is.na(rImplementation))
+			if(!all(is.na(cppImplementation))) expect_lt(max(abs(cppImplementation - rImplementation), na.rm=TRUE), 1e-8)
 		}
 		for(toCorrect in 1:19)
 		{
 			cppImplementation <- RUVIIIC:::RUVIII_C_Varying_CPP(input = data, k = 2, M = M, potentialControls = paste0("C", 1:9), toCorrect = paste0("C", toCorrect:(toCorrect+1)), withW = FALSE)
 			rImplementation <- RUVIIIC:::RUVIII_C_Varying_R(ruvInputData = data, k = 2, M = M, potentialControls = paste0("C", 1:9), toCorrect = paste0("C", toCorrect:(toCorrect + 1)), withW = FALSE, filename = NULL)
 			expect_equal(cppImplementation, rImplementation)
-			expect_less_than(max(abs(cppImplementation - rImplementation), na.rm=TRUE), 1e-8)
+			expect_identical(is.na(cppImplementation), is.na(rImplementation))
+			if(!all(is.na(cppImplementation))) expect_lt(max(abs(cppImplementation - rImplementation), na.rm=TRUE), 1e-8)
 		}
 	  })
 test_that("Test when some peptides can be corrected, and some can't", 
@@ -153,6 +161,6 @@ test_that("Test when some peptides can be corrected, and some can't",
 			rImplementation <- RUVIIIC:::RUVIII_C_Varying_R(ruvInputData = data, k = 5, M = M, potentialControls = paste0("C", 11:20), toCorrect = paste0("C", toCorrect:(toCorrect + 1)), withW = FALSE, filename = NULL)
 			expect_equal(cppImplementation, rImplementation)
 			expect_identical(is.na(cppImplementation), is.na(rImplementation))
-			expect_less_than(max(abs(cppImplementation - rImplementation), na.rm=TRUE), 1e-8)
+			if(!all(is.na(cppImplementation))) expect_lt(max(abs(cppImplementation - rImplementation), na.rm=TRUE), 1e-8)
 		}
 	  })

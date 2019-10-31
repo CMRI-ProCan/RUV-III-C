@@ -8,9 +8,9 @@ RUVIII_C_CPP <- function(input, k, M, controls, toCorrect, withW) {
         }
 	if(k >= nrow(input))
 	{
-		stop("Input k cannot be larger than the number of rows in the input matrix")
+		stop("Input k cannot be larger than or equal to the number of rows in the input matrix")
 	}
-	if(k >= length(controls))
+	if(k > length(controls))
 	{
 		stop("Input k cannot be larger than the number of negative controls")
 	}
@@ -19,9 +19,9 @@ RUVIII_C_CPP <- function(input, k, M, controls, toCorrect, withW) {
 RUVIII_C_Varying_CPP <- function(input, k, M, potentialControls, toCorrect, withW) {
 	if(k >= nrow(input))
 	{
-		stop("Input k cannot be larger than the number of rows in the input matrix")
+		stop("Input k cannot be larger than or equal to the number of rows in the input matrix")
 	}
-	if(k >= length(potentialControls))
+	if(k > length(potentialControls))
 	{
 		stop("Input k cannot be larger than the number of negative controls")
 	}

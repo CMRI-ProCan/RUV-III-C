@@ -34,8 +34,8 @@ test_that("Test that there's an error when k is too large",
                 M <- data.matrix(M)
 
 		#Larger than possible, considering the number of rows in the initial data matrix
-		expect_error(RUVIIIC:::RUVIII_C_CPP(input = data, k = 30, M = M, controls = as.character(15:20), toCorrect = as.character(1), withW = FALSE), "Input k cannot be larger than the number of rows in the input matrix")
-                expect_error(RUVIIIC:::RUVIII_C_R(ruvInputData = data, k = 30, M = M, controls = as.character(15:20), toCorrect = as.character(1), withW = FALSE, filename = NULL), "Input k cannot be larger than the number of rows in the input matrix")
+		expect_error(RUVIIIC:::RUVIII_C_CPP(input = data, k = 30, M = M, controls = as.character(15:20), toCorrect = as.character(1), withW = FALSE), "Input k cannot be larger than or equal to the number of rows in the input matrix")
+                expect_error(RUVIIIC:::RUVIII_C_R(ruvInputData = data, k = 30, M = M, controls = as.character(15:20), toCorrect = as.character(1), withW = FALSE, filename = NULL), "Input k cannot be larger than or equal to the number of rows in the input matrix")
 	})
 
 test_that("Test that there's an error when k is too large",

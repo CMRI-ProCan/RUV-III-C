@@ -29,7 +29,7 @@ RUVIII_C_Varying <- function(k, ruvInputData, M, toCorrect, filename, potentialC
 	}
 	else if(version == "R")
 	{
-		return(RUVIII_C_Varying_R(k = k, ruvInputData = ruvInputData, M = M, toCorrect = toCorrect, filename = filename, potentialControls = potenitalControls, withW = withW, batchSize = batchSize))
+		return(RUVIII_C_Varying_R(k = k, ruvInputData = ruvInputData, M = M, toCorrect = toCorrect, filename = filename, potentialControls = potentialControls, withW = withW, batchSize = batchSize))
 	}
 	else
 	{

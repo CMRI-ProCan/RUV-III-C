@@ -81,7 +81,7 @@ Rcpp::NumericMatrix RUVIIIC_Varying(Rcpp::NumericMatrix input, int k, Rcpp::Nume
 
 		//The number of rows copied into the submatrix
 		int nSubmatrixRows;
-		#pragma omp for
+		#pragma omp for schedule(dynamic)
 		for(int i = 0; i < nCorrections; i++)
 		{
 			//If there's been an error somewhere, just NOP out the rest of the loop iterations

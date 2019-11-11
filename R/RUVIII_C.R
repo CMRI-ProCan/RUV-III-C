@@ -107,6 +107,8 @@ RUVIII_C_R <- function(k, ruvInputData, M, toCorrect, filename, controls, withW 
 		load(filename)
 	}
 	pb <- progress_bar$new(total = length(toCorrect), format = "[:bar] :percent :eta")
+
+	symmetrised <- ruvInputDataWithoutNA %*% t(ruvInputDataWithoutNA)
 	#Don't bother writing anything to file, if there are no new computations. 
 	newComputation <- FALSE
 	if(length(results$peptideResults) != length(toCorrect) || any(sort(names(results$peptideResults)) != sort(toCorrect)))
@@ -121,6 +123,9 @@ RUVIII_C_R <- function(k, ruvInputData, M, toCorrect, filename, controls, withW 
 				#If tere are no non-missing observations, then we can just mark this peptide as uncorrected / uncorrectable
 				if(length(indices) > 0)
 				{
+					#Create the matrix that select rows of the input data matrix
+					selectRows <- matrix(0, nrow = length(indices), ncol = nrow(ruvInputDataWithoutNA))
+					selectRows[cbind(1:length(indices), indices)] <- 1
 					#Submatrix of the entire data matrix
 					submatrix <- ruvInputDataWithoutNA[indices, , drop = F]
 					#Submatrix of the replicate matrix
@@ -139,11 +144,8 @@ RUVIII_C_R <- function(k, ruvInputData, M, toCorrect, filename, controls, withW 
 						next
 					}
 
-					#Copied from the RUVIII code
-					Msubset <- replicate.matrix(Msubset)
-					#Residual with respect to Msubset
-					Y0 <- ruv::residop(submatrix, Msubset)
 					m <- nrow(submatrix)
+					orthogonalProjection <- diag(1, m) - Msubset %*% solve(t(Msubset) %*% Msubset) %*% t(Msubset)
 					#If the dimensions don't work, we can't correct this variable
 					if(min(m - ncol(Msubset), length(controls)) < k)
 					{
@@ -155,7 +157,7 @@ RUVIII_C_R <- function(k, ruvInputData, M, toCorrect, filename, controls, withW 
 					}
 					try({
 						#Now the RUV-III code. This may throw exceptions, possibly for numerical reasons, hence the try / catch. 
-						eigenDecomp <- eigs_sym(Y0 %*% t(Y0), k = min(m - ncol(Msubset), length(controls)), which = "LM")
+						eigenDecomp <- eigs_sym(orthogonalProjection %*% selectRows %*% symmetrised %*% t(selectRows) %*% t(orthogonalProjection), k = min(m - ncol(Msubset), length(controls)), which = "LM")
 						fullalpha <- t(eigenDecomp$vectors) %*% submatrix
 						alpha <- fullalpha[1:min(k, nrow(fullalpha)), , drop = FALSE]
 						ac <- alpha[,controls, drop = FALSE]

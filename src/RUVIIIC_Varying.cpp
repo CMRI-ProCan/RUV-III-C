@@ -58,6 +58,8 @@ Rcpp::NumericMatrix RUVIIIC_Varying(Rcpp::NumericMatrix input, int k, Rcpp::Nume
 	//And we're also going to replace NAs with 0s in this row major copy
 	inputAsRowMajorImputed = inputAsRowMajorImputed.unaryExpr([](double v){return std::isnan(v) ? 0.0 : v; });
 
+	Eigen::MatrixXd inputSymmetrised = inputAsRowMajorImputed * inputAsRowMajorImputed.transpose();
+
 	//Was there an error found during the program? We need a flag, because we can't throw exceptions from inside a parallel loop
 	bool foundError = false;
 	std::string error;
@@ -73,6 +75,8 @@ Rcpp::NumericMatrix RUVIIIC_Varying(Rcpp::NumericMatrix input, int k, Rcpp::Nume
 		Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::ColMajor> submatrixMReducedColumns(nRows, M.ncol());
 		//Matrix used to extract the effects on the control variables
 		Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::ColMajor> ac(nRows, controlIndices.size());
+		//Matrix that selects out the relevant rows of the overall data matrix. E.g. submatrixData = selectRowsFromInput * inputAsRowMajorImputed
+		Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> selectRowsFromInput(nRows, nRows);
 
 		//The indices of the negative control variables used, to normalize the current variable
 		std::vector<int> controlIndicesThisVariable;
@@ -143,10 +147,17 @@ Rcpp::NumericMatrix RUVIIIC_Varying(Rcpp::NumericMatrix input, int k, Rcpp::Nume
 				resultsAsEigen.col(i) = Eigen::VectorXd::Constant(nRows, std::numeric_limits<double>::quiet_NaN());
 				continue;
 			}
+			//Create the view which has the correct number of rows
+			auto selectRowsFromInputView = selectRowsFromInput.block(0, 0, nSubmatrixRows, nRows);
+			selectRowsFromInputView = Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>::Constant(nSubmatrixRows, nRows, 0);
+			for(int i = 0; i < nonMissingIndices.size(); i++)
+			{
+				selectRowsFromInputView(i, nonMissingIndices[i]) = 1;
+			}
 			//Take projection of submatrixDataView on the subspace orthogonal to submatrixMReducedColumnsView
-			auto orthogonalProjection = submatrixDataView - submatrixMReducedColumnsView * (submatrixMReducedColumnsView.transpose() * submatrixMReducedColumnsView).inverse() * submatrixMReducedColumnsView.transpose() * submatrixDataView;
+			auto orthogonalProjection = Eigen::MatrixXd::Identity(nSubmatrixRows, nSubmatrixRows) - submatrixMReducedColumnsView * (submatrixMReducedColumnsView.transpose() * submatrixMReducedColumnsView).inverse() * submatrixMReducedColumnsView.transpose();
 			//Symmetrise. It seems that if you don't explicitly set this type, things go screwy. The automatic type would be some kind of expression template, and I guess that when that goes directly into the Spectra::DenseSymMatProd below, something unexpected happens?
-			Eigen::MatrixXd symmetrisedOrthogonal = orthogonalProjection * orthogonalProjection.transpose();
+			Eigen::MatrixXd symmetrisedOrthogonal = orthogonalProjection * selectRowsFromInputView * inputSymmetrised * selectRowsFromInputView.transpose() * orthogonalProjection.transpose();
 			//Tell Spectra the type used for matrix operations. 
 			Spectra::DenseSymMatProd<double> spectraMatrix(symmetrisedOrthogonal);
 			//Parameter relating to convergence. Using the default recommended value here.

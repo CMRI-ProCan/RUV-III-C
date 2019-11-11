@@ -128,7 +128,7 @@ Rcpp::NumericMatrix RUVIIIC(Rcpp::NumericMatrix input, int k, Rcpp::NumericMatri
 			//Tell Spectra the type used for matrix operations. 
 			Spectra::DenseSymMatProd<double> spectraMatrix(symmetrisedOrthogonal);
 			//Parameter relating to convergence. Using the default recommended value here.
-			int nConvergence = std::min(columnsMReduced, std::max(2 * k + 1, 20));
+			int nConvergence = std::min(static_cost<int>(symmetrisedOrthogonal.rows()), std::max(2 * k + 1, 20));
 			Spectra::SymEigsSolver<double, Spectra::WHICH_LM, Spectra::DenseSymMatProd<double> > eigs(&spectraMatrix, k, nConvergence);
 			eigs.init();
 			int nFoundEigenValues = eigs.compute(1000, 1e-10);

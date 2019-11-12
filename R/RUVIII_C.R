@@ -155,29 +155,57 @@ RUVIII_C_R <- function(k, ruvInputData, M, toCorrect, filename, controls, withW 
 						if(withW) results$W[peptide] <- list(c())
 						next
 					}
-					try({
-						#Now the RUV-III code. This may throw exceptions, possibly for numerical reasons, hence the try / catch. 
-						eigenDecomp <- eigs_sym(orthogonalProjection %*% selectRows %*% symmetrised %*% t(selectRows) %*% t(orthogonalProjection), k = min(m - ncol(Msubset), length(controls)), which = "LM")
-						fullalpha <- t(eigenDecomp$vectors) %*% submatrix
-						alpha <- fullalpha[1:min(k, nrow(fullalpha)), , drop = FALSE]
-						ac <- alpha[,controls, drop = FALSE]
-						currentPeptideW <- submatrix[, controls] %*% t(ac) %*% solve(ac %*% t(ac))
-						currentResult <- fullalpha[1:k, peptide]
+					#In the special case that we're trying to remove the maximum possible number of factors from this peptide, the eigen decomposition seems like it can be unstable. Fortunately, there is also the simpler GLS formulation, which may avoid those problems. 
+					if(m - ncol(Msubset) == k)
+					{
+						#Use only the columns of Msubset that have one or more replicates to get out alphaHat
+						orthogonalProjection <- diag(1, m) - Msubset %*% solve(t(Msubset) %*% Msubset) %*% t(Msubset)
+						productDesign <- Msubset %*% t(Msubset)
+						Uk <- svd(orthogonalProjection)$u[, 1:k]
+						
+						#These are used in the GLS formula
+						productControls <- submatrix[, controls] %*% t(submatrix[, controls])
+						invMatrix <- solve(productControls)
 
-						#Now we extend the corrected results out to a full matrix. 
 						adjusted <- vector(mode = "numeric", length = nrow(ruvInputDataWithoutNA))
 						adjusted[] <- NA
-						adjusted[indices] <- submatrix[,peptide, drop=F] - currentPeptideW %*% cbind(currentResult)
+						adjusted[indices] <- Msubset %*% solve(t(Msubset) %*% invMatrix %*% Msubset) %*% t(Msubset) %*% invMatrix %*% submatrix[, peptide]
 						names(adjusted) <- rownames(ruvInputDataWithoutNA)
-
-						results$alphaResults[[peptide]] <- currentResult
 						results$peptideResults[[peptide]] <- adjusted
+						results$alphaResults[[peptide]] <- t(Uk) %*% submatrix
 						if(withW)
 						{
-							results$W[[peptide]] <- currentPeptideW
+							results$W[[peptide]] <- matrix(nrow = nrow(ruvInputDataWithoutNA), ncol = k)
+							results$W[[peptide]][indices, ] <- productControls %*% Uk %*% solve(t(Uk) %*% productControls %*% Uk)
 						}
-						newComputation <- TRUE
-					}, silent = TRUE)
+					}
+					else
+					{
+						try({
+							#Now the RUV-III code. This may throw exceptions, possibly for numerical reasons, hence the try / catch. 
+							eigenDecomp <- eigs_sym(orthogonalProjection %*% selectRows %*% symmetrised %*% t(selectRows) %*% t(orthogonalProjection), k = min(m - ncol(Msubset), length(controls)), which = "LM")
+							fullalpha <- t(eigenDecomp$vectors) %*% submatrix
+							alpha <- fullalpha[1:min(k, nrow(fullalpha)), , drop = FALSE]
+							ac <- alpha[,controls, drop = FALSE]
+							currentPeptideW <- submatrix[, controls] %*% t(ac) %*% solve(ac %*% t(ac))
+							currentResult <- fullalpha[1:k, peptide]
+
+							#Now we extend the corrected results out to a full matrix. 
+							adjusted <- vector(mode = "numeric", length = nrow(ruvInputDataWithoutNA))
+							adjusted[] <- NA
+							adjusted[indices] <- submatrix[,peptide, drop=F] - currentPeptideW %*% cbind(currentResult)
+							names(adjusted) <- rownames(ruvInputDataWithoutNA)
+
+							results$alphaResults[[peptide]] <- currentResult
+							results$peptideResults[[peptide]] <- adjusted
+							if(withW)
+							{
+								results$W[[peptide]] <- rep(as.numeric(NA), nrow(ruvInputDataWithoutNA))
+								results$W[[peptide]][indices] <- currentPeptideW
+							}
+							newComputation <- TRUE
+						}, silent = TRUE)
+					}
 				} else
 				{
 					newComputation <- TRUE
@@ -210,7 +238,7 @@ RUVIII_C_R <- function(k, ruvInputData, M, toCorrect, filename, controls, withW 
 	}
 	if(withW)
 	{
-		return(list(newY = do.call(cbind, results$peptideResults), W = results$W))
+		return(list(newY = do.call(cbind, results$peptideResults), W = results$W, alpha = results$alphaResults))
 	}
 	else
 	{

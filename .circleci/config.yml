@@ -5,23 +5,29 @@ variables:
     docker:
       - image: cmriprocan/cci-ruviii_c-docker-primary:3.6.1
 
-  common: &common
+  linux_setup: &linux_setup
     run:
+      name: Setting up build environment
       command: |
-        printf 'export WORKSPACE=%s\n' $(pwd) >> $BASH_ENV
+        # need to install gnupg before the following will work
+        sudo apt update
+        sudo apt install -y gnupg curl
 
   package_build: &package_build
     run:
+      name: Building package
       command: |
         R CMD INSTALL .
 
   test: &test
     run:
+      name: Testing package
       command: |
         cd ${WORKSPACE}/tests && R -e "source('./testthat.R')"
 
   version_info: &version_info
     run:
+      name: Calculating new version, docker, and git tags
       command: |
         version=$(cat version)
 
@@ -45,6 +51,7 @@ variables:
 
   docker_build: &docker_build
     run:
+      name: Building docker image
       command: |
         source $BASH_ENV
 
@@ -61,6 +68,7 @@ variables:
   
   publish: &publish
     run:
+      name: Publishing new docker image and git version
       command: |
         source $BASH_ENV
 
@@ -82,8 +90,8 @@ jobs:
   build-linux:
     <<: *linux
     steps:
-      - *common
       - checkout
+      - setup_remote_docker:
       - *package_build
       - *test
       - *version_info

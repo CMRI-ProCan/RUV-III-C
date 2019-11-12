@@ -65,9 +65,8 @@ variables:
 
         DOCKER_BUILDKIT=1 docker build \
           --network host \
-          --secret \
           --build-arg bitbucket_user="${BITBUCKET_USER}" \
-          id=gitpassword,src=$(pwd)/gitpassword.txt \
+          --secret id=gitpassword,src=$(pwd)/gitpassword.txt \
           -t ${DOCKER_FLAG} docker
   
   publish: &publish

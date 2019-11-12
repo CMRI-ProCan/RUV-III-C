@@ -147,55 +147,19 @@ Rcpp::NumericMatrix RUVIIIC_Varying(Rcpp::NumericMatrix input, int k, Rcpp::Nume
 				resultsAsEigen.col(i) = Eigen::VectorXd::Constant(nRows, std::numeric_limits<double>::quiet_NaN());
 				continue;
 			}
-			//Create the view which has the correct number of rows
-			auto selectRowsFromInputView = selectRowsFromInput.block(0, 0, nSubmatrixRows, nRows);
-			selectRowsFromInputView = Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>::Constant(nSubmatrixRows, nRows, 0);
-			for(int i = 0; i < nonMissingIndices.size(); i++)
+			//In the special case that we're trying to remove the maximum possible number of factors, we can use the GLS formulation. 
+			else if (nSubmatrixRows - columnsMReduced == k)
 			{
-				selectRowsFromInputView(i, nonMissingIndices[i]) = 1;
-			}
-			//Take projection of submatrixDataView on the subspace orthogonal to submatrixMReducedColumnsView
-			auto orthogonalProjection = Eigen::MatrixXd::Identity(nSubmatrixRows, nSubmatrixRows) - submatrixMReducedColumnsView * (submatrixMReducedColumnsView.transpose() * submatrixMReducedColumnsView).inverse() * submatrixMReducedColumnsView.transpose();
-			//Symmetrise. It seems that if you don't explicitly set this type, things go screwy. The automatic type would be some kind of expression template, and I guess that when that goes directly into the Spectra::DenseSymMatProd below, something unexpected happens?
-			Eigen::MatrixXd symmetrisedOrthogonal = orthogonalProjection * selectRowsFromInputView * inputSymmetrised * selectRowsFromInputView.transpose() * orthogonalProjection.transpose();
-			//Tell Spectra the type used for matrix operations. 
-			Spectra::DenseSymMatProd<double> spectraMatrix(symmetrisedOrthogonal);
-			//Parameter relating to convergence. Using the default recommended value here.
-			int nConvergence = std::min(static_cast<int>(symmetrisedOrthogonal.rows()), std::max(2 * k + 1, 20));
-			Spectra::SymEigsSolver<double, Spectra::WHICH_LM, Spectra::DenseSymMatProd<double> > eigs(&spectraMatrix, k, nConvergence);
-			eigs.init();
-			int nFoundEigenValues = eigs.compute(1000, 1e-10);
-			//Check that we found the right number of eigenvalues
-			if(nFoundEigenValues < k)
-			{
-				#pragma omp critical
-				{
-					if(!foundError)
-					{
-						foundError = true;
-						error = "Not enough eigenvalues converged";
-					}
-				}
-			}
-			else
-			{
-				//get out the eigenvectors
-				Eigen::MatrixXd eigenVectors = eigs.eigenvectors();
-				//Get out alpha - effects on all the variables
-				Eigen::MatrixXd alpha = eigenVectors.transpose() * submatrixDataView;
-				//We need a view, to account for the fact that we're only using part of ac
-				auto acView = ac.block(0, 0, alpha.rows(), controlIndicesThisVariable.size());
 				//We need a view, to account for the fact that we're only using part of submatrixDataControls
 				auto submatrixDataControlsView = submatrixDataControls.block(0, 0, nSubmatrixRows, controlIndicesThisVariable.size());
 				//Further subset fullalpha, looking at just the columns corresponding to the control variables
 				for(int controlCounter = 0; controlCounter < static_cast<int>(controlIndicesThisVariable.size()); controlCounter++)
 				{
-					acView.col(controlCounter) = alpha.col(controlIndicesThisVariable[controlCounter]);
 					submatrixDataControlsView.col(controlCounter) = submatrixDataView.col(controlIndicesThisVariable[controlCounter]);
 				}
-				auto currentPeptideW = submatrixDataControlsView * acView.transpose() * (acView * acView.transpose()).inverse();
-				//Now store the results. We're putting the results back into the correct places in the results matrix.
-				auto corrected = submatrixDataView.col(columnIndexWithinInput) - currentPeptideW * alpha.col(columnIndexWithinInput);
+				auto productControls = submatrixDataControlsView * submatrixDataControlsView.transpose();
+				auto invProductControls = productControls.inverse();
+				auto corrected = submatrixMReducedColumnsView * (submatrixMReducedColumnsView.transpose() * invProductControls * submatrixMReducedColumnsView).inverse() * submatrixMReducedColumnsView.transpose() * invProductControls * submatrixDataView.col(columnIndexWithinInput);
 				//Now store the results. We're putting the results back into the correct places in the results matrix.
 				int correctedCounter = 0;
 				for(int row = 0; row < nRows; row++)
@@ -211,7 +175,87 @@ Rcpp::NumericMatrix RUVIIIC_Varying(Rcpp::NumericMatrix input, int k, Rcpp::Nume
 					}
 				}
 			}
+			else
+			{
+				//Create the view which has the correct number of rows
+				auto selectRowsFromInputView = selectRowsFromInput.block(0, 0, nSubmatrixRows, nRows);
+				selectRowsFromInputView = Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>::Constant(nSubmatrixRows, nRows, 0);
+				for(int i = 0; i < nonMissingIndices.size(); i++)
+				{
+					selectRowsFromInputView(i, nonMissingIndices[i]) = 1;
+				}
+				//Take projection of submatrixDataView on the subspace orthogonal to submatrixMReducedColumnsView
+				auto orthogonalProjection = Eigen::MatrixXd::Identity(nSubmatrixRows, nSubmatrixRows) - submatrixMReducedColumnsView * (submatrixMReducedColumnsView.transpose() * submatrixMReducedColumnsView).inverse() * submatrixMReducedColumnsView.transpose();
+				//Symmetrise. It seems that if you don't explicitly set this type, things go screwy. The automatic type would be some kind of expression template, and I guess that when that goes directly into the Spectra::DenseSymMatProd below, something unexpected happens?
+				Eigen::MatrixXd symmetrisedOrthogonal = orthogonalProjection * selectRowsFromInputView * inputSymmetrised * selectRowsFromInputView.transpose() * orthogonalProjection.transpose();
+				//Tell Spectra the type used for matrix operations. 
+				Spectra::DenseSymMatProd<double> spectraMatrix(symmetrisedOrthogonal);
+				//Parameter relating to convergence. Using the default recommended value here.
+				int nConvergence = std::min(static_cast<int>(symmetrisedOrthogonal.rows()), std::max(2 * k + 1, 20));
+				try
+				{
+					Spectra::SymEigsSolver<double, Spectra::WHICH_LM, Spectra::DenseSymMatProd<double> > eigs(&spectraMatrix, k, nConvergence);
+					eigs.init();
+					int nFoundEigenValues = eigs.compute(1000, 1e-10);
+					//Check that we found the right number of eigenvalues
+					if(nFoundEigenValues < k)
+					{
+						#pragma omp critical
+						{
+							foundError = true;
+							std::cout << "Not enough eigenvalues converged for variable " << currentToCorrect << std::endl;
+						}
+					}
+					else
+					{
+						//get out the eigenvectors
+						Eigen::MatrixXd eigenVectors = eigs.eigenvectors();
+						//Get out alpha - effects on all the variables
+						Eigen::MatrixXd alpha = eigenVectors.transpose() * submatrixDataView;
+						//We need a view, to account for the fact that we're only using part of ac
+						auto acView = ac.block(0, 0, alpha.rows(), controlIndicesThisVariable.size());
+						//We need a view, to account for the fact that we're only using part of submatrixDataControls
+						auto submatrixDataControlsView = submatrixDataControls.block(0, 0, nSubmatrixRows, controlIndicesThisVariable.size());
+						//Further subset fullalpha, looking at just the columns corresponding to the control variables
+						for(int controlCounter = 0; controlCounter < static_cast<int>(controlIndicesThisVariable.size()); controlCounter++)
+						{
+							acView.col(controlCounter) = alpha.col(controlIndicesThisVariable[controlCounter]);
+							submatrixDataControlsView.col(controlCounter) = submatrixDataView.col(controlIndicesThisVariable[controlCounter]);
+						}
+						auto currentPeptideW = submatrixDataControlsView * acView.transpose() * (acView * acView.transpose()).inverse();
+						//Now store the results. We're putting the results back into the correct places in the results matrix.
+						auto corrected = submatrixDataView.col(columnIndexWithinInput) - currentPeptideW * alpha.col(columnIndexWithinInput);
+						//Now store the results. We're putting the results back into the correct places in the results matrix.
+						int correctedCounter = 0;
+						for(int row = 0; row < nRows; row++)
+						{
+							if(std::isnan(input(row, columnIndexWithinInput)))
+							{
+								resultsAsEigen(row, i) = std::numeric_limits<double>::quiet_NaN();
+							}
+							else 
+							{
+								resultsAsEigen(row, i) = corrected(correctedCounter);
+								correctedCounter++;
+							}
+						}
+					}
+				}
+				catch(...)
+				{
+					#pragma omp critical
+					{
+						foundError = true;
+						std::cout << "Error in eigen decomposition for marker " << currentToCorrect << std::endl;
+						for(int row = 0; row < nRows; row++)
+						{
+							resultsAsEigen(row, i) = std::numeric_limits<double>::quiet_NaN();
+						}
+					}
+				}
+			}
 		}
 	}
+	if(foundError) throw std::runtime_error("Error in RUVIIIC_Varying, check output");
 	return results;
 }

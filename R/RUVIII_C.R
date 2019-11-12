@@ -145,7 +145,6 @@ RUVIII_C_R <- function(k, ruvInputData, M, toCorrect, filename, controls, withW 
 					}
 
 					m <- nrow(submatrix)
-					orthogonalProjection <- diag(1, m) - Msubset %*% solve(t(Msubset) %*% Msubset) %*% t(Msubset)
 					#If the dimensions don't work, we can't correct this variable
 					if(min(m - ncol(Msubset), length(controls)) < k)
 					{
@@ -156,7 +155,7 @@ RUVIII_C_R <- function(k, ruvInputData, M, toCorrect, filename, controls, withW 
 						next
 					}
 					#In the special case that we're trying to remove the maximum possible number of factors from this peptide, the eigen decomposition seems like it can be unstable. Fortunately, there is also the simpler GLS formulation, which may avoid those problems. 
-					if(m - ncol(Msubset) == k)
+					else if(m - ncol(Msubset) == k)
 					{
 						#Use only the columns of Msubset that have one or more replicates to get out alphaHat
 						orthogonalProjection <- diag(1, m) - Msubset %*% solve(t(Msubset) %*% Msubset) %*% t(Msubset)
@@ -181,6 +180,7 @@ RUVIII_C_R <- function(k, ruvInputData, M, toCorrect, filename, controls, withW 
 					}
 					else
 					{
+						orthogonalProjection <- diag(1, m) - Msubset %*% solve(t(Msubset) %*% Msubset) %*% t(Msubset)
 						try({
 							#Now the RUV-III code. This may throw exceptions, possibly for numerical reasons, hence the try / catch. 
 							eigenDecomp <- eigs_sym(orthogonalProjection %*% selectRows %*% symmetrised %*% t(selectRows) %*% t(orthogonalProjection), k = min(m - ncol(Msubset), length(controls)), which = "LM")

@@ -68,7 +68,7 @@ variables:
           --secret \
           --build-arg bitbucket_user="${BITBUCKET_USER}" \
           id=gitpassword,src=$(pwd)/gitpassword.txt \
-          -t ${DOCKER_FLAG} docker/Dockerfile
+          -t ${DOCKER_FLAG} docker
   
   publish: &publish
     run:

@@ -23,7 +23,7 @@ variables:
     run:
       name: Testing package
       command: |
-        cd ${WORKSPACE}/tests && R -e "source('./testthat.R')"
+        cd tests && R -e "source('./testthat.R')"
 
   version_info: &version_info
     run:

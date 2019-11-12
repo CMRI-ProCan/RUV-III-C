@@ -1,4 +1,3 @@
-context("Test C++ implementation")
 test_that("Test simple scenario 1", 
 	  {
 		set.seed(1)

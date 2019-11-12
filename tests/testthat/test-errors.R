@@ -1,4 +1,3 @@
-context("Test errors")
 test_that("Test NAs in negative control columns",
 	{
                 set.seed(1)
@@ -80,4 +79,5 @@ test_that("Test that there's no bug in input to Spectra::SymEigsSolver",
                 result <- RUVIII_C(ruvInputData = copiedData, k = 3, M = M, toCorrect = as.character(targetColumn), controls = as.character(16:20), withW = FALSE, filename = NULL, version = "R")
                 result <- RUVIII_C_Varying(ruvInputData = copiedData, k = 3, M = M, toCorrect = as.character(targetColumn), potentialControls = as.character(16:20), withW = FALSE, filename = NULL, version = "CPP")
 		result <- RUVIII_C_Varying(ruvInputData = copiedData, k = 3, M = M, toCorrect = as.character(targetColumn), potentialControls = as.character(16:20), withW = FALSE, filename = NULL, version = "R")
+		expect_identical(TRUE, TRUE)
 	  })

@@ -59,8 +59,6 @@ variables:
       command: |
         source $BASH_ENV
 
-        ls
-
         sh +x -c 'echo $DOCKER_PASSWORD' | docker login -u ${DOCKER_USER} --password-stdin
 
         echo $BITBUCKET_PASSWORD > bitbucket_pw.txt

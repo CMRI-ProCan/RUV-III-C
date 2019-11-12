@@ -10,11 +10,12 @@ License: GPL-3
 LazyLoad: yes
 LinkingTo: Rcpp, RcppEigen, RSpectra
 Imports: Rcpp
+Suggests:
+    ruv
 Depends: 
     R (>= 3.4),
     RSpectra,
-    progress,
-    ruv
+    progress
 Collate:
     'RUVIII_C_Varying.R'
     'RUVIII_C.R'

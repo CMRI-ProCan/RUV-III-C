@@ -1,4 +1,3 @@
-context("Compare RUV-III-C implementation with equivalent RUV-III")
 test_that("Test NAs in only the corrected column",
 	{
                 set.seed(1)
@@ -21,7 +20,7 @@ test_that("Test NAs in only the corrected column",
 					copiedData <- data
 					copiedData[naIndex, targetColumn] <- NA
 					result <- RUVIII_C(ruvInputData = copiedData, k = k, M = M, toCorrect = as.character(targetColumn), controls = as.character(18:20), withW = FALSE, filename = NULL, version = "CPP")
-					result_standardRUVIII <- RUVIII(Y = copiedData[-naIndex, ], M = M[-naIndex, ], k = k, ctl = 18:20)
+					result_standardRUVIII <- ruv::RUVIII(Y = copiedData[-naIndex, ], M = M[-naIndex, ], k = k, ctl = 18:20)
 					expect_equal(result[-naIndex, , drop=F], result_standardRUVIII[, targetColumn, drop=F])
 					
 					result <- RUVIII_C(ruvInputData = copiedData, k = k, M = M, toCorrect = as.character(targetColumn), controls = as.character(18:20), withW = FALSE, filename = NULL, version = "R")
@@ -57,7 +56,7 @@ test_that("Test NAs in other columns too",
 
 					RUVIIIdata <- copiedData
 					RUVIIIdata[naIndex+1, targetColumn+1] <- 0
-					result_standardRUVIII <- RUVIII(Y = RUVIIIdata[-naIndex, ], M = M[-naIndex, ], k = k, ctl = 18:20)
+					result_standardRUVIII <- ruv::RUVIII(Y = RUVIIIdata[-naIndex, ], M = M[-naIndex, ], k = k, ctl = 18:20)
 					expect_equal(result[-naIndex, , drop=F], result_standardRUVIII[, targetColumn, drop=F])
 					
 					result <- RUVIII_C(ruvInputData = copiedData, k = k, M = M, toCorrect = as.character(targetColumn), controls = as.character(18:20), withW = FALSE, filename = NULL, version = "R")

@@ -1,4 +1,3 @@
-context("Compare RUV-III-C-Varying implementation with equivalent RUV-III")
 test_that("Test NAs in only the corrected column",
 	{
                 set.seed(1)
@@ -21,7 +20,7 @@ test_that("Test NAs in only the corrected column",
 					copiedData <- data
 					copiedData[naIndex, targetColumn] <- NA
 					result <- RUVIII_C_Varying(ruvInputData = copiedData, k = k, M = M, toCorrect = as.character(targetColumn), potentialControls = as.character(18:20), withW = FALSE, filename = NULL, version = "CPP")
-					result_standardRUVIII <- RUVIII(Y = copiedData[-naIndex, ], M = M[-naIndex, ], k = k, ctl = 18:20)
+					result_standardRUVIII <- ruv::RUVIII(Y = copiedData[-naIndex, ], M = M[-naIndex, ], k = k, ctl = 18:20)
 					expect_equal(result[-naIndex, , drop=F], result_standardRUVIII[, targetColumn, drop=F])
 					
 					result <- RUVIII_C_Varying(ruvInputData = copiedData, k = k, M = M, toCorrect = as.character(targetColumn), potentialControls = as.character(18:20), withW = FALSE, filename = NULL, version = "R")
@@ -57,7 +56,7 @@ test_that("Test NAs in the corrected column, and also an NA in a different row i
 
 					RUVIIIdata <- copiedData
 					RUVIIIdata[naIndex+1, targetColumn+1] <- 0
-					result_standardRUVIII <- RUVIII(Y = RUVIIIdata[-naIndex, ], M = M[-naIndex, ], k = k, ctl = 18:20)
+					result_standardRUVIII <- ruv::RUVIII(Y = RUVIIIdata[-naIndex, ], M = M[-naIndex, ], k = k, ctl = 18:20)
 					expect_equal(result[-naIndex, , drop=F], result_standardRUVIII[, targetColumn, drop=F])
 					
 					result <- RUVIII_C_Varying(ruvInputData = copiedData, k = k, M = M, toCorrect = as.character(targetColumn), potentialControls = as.character(18:20), withW = FALSE, filename = NULL, version = "R")
@@ -91,7 +90,7 @@ test_that("Test NAs in the corrected column, and also in a control for the same 
 					#Because the NA is in a control on the same line as the NA in the variable to correct, we actually use all the controls here
 					copiedData[naIndex, "16"] <- NA
 					result <- RUVIII_C_Varying(ruvInputData = copiedData, k = k, M = M, toCorrect = as.character(targetColumn), potentialControls = as.character(16:20), withW = FALSE, filename = NULL, version = "CPP")
-					result_standardRUVIII <- RUVIII(Y = copiedData[-naIndex, ], M = M[-naIndex, ], k = k, ctl = 16:20)
+					result_standardRUVIII <- ruv::RUVIII(Y = copiedData[-naIndex, ], M = M[-naIndex, ], k = k, ctl = 16:20)
 					expect_equal(result[-naIndex, , drop=F], result_standardRUVIII[, targetColumn, drop=F])
 					
 					result <- RUVIII_C_Varying(ruvInputData = copiedData, k = k, M = M, toCorrect = as.character(targetColumn), potentialControls = as.character(16:20), withW = FALSE, filename = NULL, version = "R")
@@ -127,7 +126,7 @@ test_that("Test NAs in the corrected column, and also in a control for a differe
 					
 					RUVIIIdata <- copiedData
 					RUVIIIdata[naIndex+1, "16"] <- 0
-					result_standardRUVIII <- RUVIII(Y = RUVIIIdata[-naIndex, ], M = M[-naIndex, ], k = k, ctl = 17:20)
+					result_standardRUVIII <- ruv::RUVIII(Y = RUVIIIdata[-naIndex, ], M = M[-naIndex, ], k = k, ctl = 17:20)
 					expect_equal(result[-naIndex, , drop=F], result_standardRUVIII[, targetColumn, drop=F])
 					
 					result <- RUVIII_C_Varying(ruvInputData = copiedData, k = k, M = M, toCorrect = as.character(targetColumn), potentialControls = as.character(16:20), withW = FALSE, filename = NULL, version = "R")
@@ -165,7 +164,7 @@ test_that("Test NAs in the corrected column, and also in a control for a differe
 
 					RUVIIIdata <- copiedData
 					RUVIIIdata[naIndex+1, targetColumn+1] <- 0
-					result_standardRUVIII <- RUVIII(Y = RUVIIIdata[-naIndex, ], M = M[-naIndex, ], k = k, ctl = 16:20)
+					result_standardRUVIII <- ruv::RUVIII(Y = RUVIIIdata[-naIndex, ], M = M[-naIndex, ], k = k, ctl = 16:20)
 					expect_equal(result[-naIndex, , drop=F], result_standardRUVIII[, targetColumn, drop=F])
 					
 					result <- RUVIII_C_Varying(ruvInputData = copiedData, k = k, M = M, toCorrect = as.character(targetColumn), potentialControls = as.character(16:20), withW = FALSE, filename = NULL, version = "R")
@@ -203,7 +202,7 @@ test_that("Test NAs in the corrected column, other noncontrol columns, and also 
 					RUVIIIdata <- copiedData
 					RUVIIIdata[naIndex+1, targetColumn+1] <- 0
 					RUVIIIdata[naIndex+1, "16"] <- 0
-					result_standardRUVIII <- RUVIII(Y = RUVIIIdata[-naIndex, ], M = M[-naIndex, ], k = k, ctl = 17:20)
+					result_standardRUVIII <- ruv::RUVIII(Y = RUVIIIdata[-naIndex, ], M = M[-naIndex, ], k = k, ctl = 17:20)
 					expect_equal(result[-naIndex, , drop=F], result_standardRUVIII[, targetColumn, drop=F])
 					
 					result <- RUVIII_C_Varying(ruvInputData = copiedData, k = k, M = M, toCorrect = as.character(targetColumn), potentialControls = as.character(16:20), withW = FALSE, filename = NULL, version = "R")

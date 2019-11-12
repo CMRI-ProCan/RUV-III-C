@@ -1,4 +1,3 @@
-context("Test corner cases where GLS formulation is used")
 test_that("Test with 50 controls", 
 	{
 		for(counter in 1:4)
@@ -26,7 +25,7 @@ test_that("Test with 50 controls",
 
 			vanillaM <- M[indices, ]
 			vanillaM <- vanillaM[, apply(vanillaM, 2, sum) > 0]
-			resultVanilla <- RUVIII(k = 4, Y = simulatedData[indices, ], M = vanillaM, ctl = 950:1000)
+			resultVanilla <- ruv::RUVIII(k = 4, Y = simulatedData[indices, ], M = vanillaM, ctl = 950:1000)
 			expect_equal(resultVanilla[,1], result$newY[indices, "Var1"])
 	
 	
@@ -65,7 +64,7 @@ test_that("Test with 25 controls",
 			vanillaM <- vanillaM[, apply(vanillaM, 2, sum) > 0]
 			vanillaData <- simulatedData[indices, ]
 			vanillaData[is.na(vanillaData)] <- 0
-			resultVanilla <- RUVIII(k = 4, Y = vanillaData, M = vanillaM, ctl = 975:1000)
+			resultVanilla <- ruv::RUVIII(k = 4, Y = vanillaData, M = vanillaM, ctl = 975:1000)
 			expect_equal(resultVanilla[,1], result_varying$newY[indices, "Var1"])
 		}
 	})

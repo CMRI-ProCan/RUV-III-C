@@ -11,7 +11,7 @@ ARG bitbucket_user
 
 ENV DEBIAN_FRONTEND noninteractive
 
-COPY docker/packages.txt .
+COPY packages.txt .
 
 RUN apt-get update \
  && apt-get -yq dist-upgrade \
@@ -21,7 +21,7 @@ RUN apt-get update \
 
 RUN rm packages.txt
 
-COPY docker/Rpackages.txt .
+COPY Rpackages.txt .
 
 RUN R -e "packages <- read.table('./Rpackages.txt', stringsAsFactors=FALSE); install.packages(packages[,1]);"
 

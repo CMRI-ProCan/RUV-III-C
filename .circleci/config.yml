@@ -9,9 +9,13 @@ variables:
     run:
       name: Setting up build environment
       command: |
-        # need to install gnupg before the following will work
         sudo apt update
         sudo apt install -y gnupg curl
+
+        VER=18.09.3
+        curl -L -o /tmp/docker-$VER.tgz https://get.docker.com/builds/Linux/x86_64/docker-$VER.tgz
+        tar -xz -C /tmp -f /tmp/docker-$VER.tgz
+        mv /tmp/docker/* /usr/bin       
 
   package_build: &package_build
     run:
@@ -92,6 +96,9 @@ jobs:
     steps:
       - checkout
       - setup_remote_docker:
+          docker_layer_caching: false
+          version: 18.09.3
+      - *linux_setup
       - *package_build
       - *test
       - *version_info

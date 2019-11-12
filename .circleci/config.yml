@@ -5,15 +5,15 @@ variables:
     docker:
       - image: cmriprocan/cci-ruviii_c-docker-primary:3.6.1
 
-  package_build: &package_build
-    run:
-      command: |
-        R CMD INSTALL .
-
   common: &common
     run:
       command: |
         printf 'export WORKSPACE=%s\n' $(pwd) >> $BASH_ENV
+
+  package_build: &package_build
+    run:
+      command: |
+        R CMD INSTALL .
 
   test: &test
     run:
@@ -86,6 +86,9 @@ jobs:
       - checkout
       - *package_build
       - *test
+      - *version_info
+      - *docker_build
+      - *publish
 
 workflows:
   version: 2

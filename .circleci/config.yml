@@ -27,7 +27,7 @@ variables:
     run:
       name: Testing package
       command: |
-        cd tests && R -e "source('./testthat.R')"
+        cd tests && R -e "source('./testthat.R')" && cd ..
 
   version_info: &version_info
     run:
@@ -58,6 +58,8 @@ variables:
       name: Building docker image
       command: |
         source $BASH_ENV
+
+        ls
 
         sh +x -c 'echo $DOCKER_PASSWORD' | docker login -u ${DOCKER_USER} --password-stdin
 

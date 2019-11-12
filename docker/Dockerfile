@@ -7,9 +7,11 @@ FROM ubuntu:18.04
 
 USER root
 
+ARG bitbucket_user
+
 ENV DEBIAN_FRONTEND noninteractive
 
-COPY docker/packages.txt .
+COPY packages.txt .
 
 RUN apt-get update \
  && apt-get -yq dist-upgrade \
@@ -19,7 +21,7 @@ RUN apt-get update \
 
 RUN rm packages.txt
 
-COPY docker/Rpackages.txt .
+COPY Rpackages.txt .
 
 RUN R -e "packages <- read.table('./Rpackages.txt', stringsAsFactors=FALSE); install.packages(packages[,1]);"
 
@@ -47,8 +49,8 @@ RUN update-alternatives --install /usr/lib/x86_64-linux-gnu/libblas.so libblas.s
  && update-alternatives --install /usr/lib/x86_64-linux-gnu/liblapack.so liblapack.so-x86_64-linux-gnu /opt/intel/mkl/lib/intel64/libmkl_rt.so 50 \
  && update-alternatives --install /usr/lib/x86_64-linux-gnu/liblapack.so.3 liblapack.so.3-x86_64-linux-gnu /opt/intel/mkl/lib/intel64/libmkl_rt.so 50
 
-RUN --mount=type=secret,id=gitpassword cd / \
- && git clone https://rshah-cmri:$(cat /run/secrets/gitpassword)@bitbucket.org/cmriprocan/ruviii_c.git  \
+RUN --mount=type=secret,id=bitbucket_pw cd / \
+ && git clone https://${bitbucket_user}:$(cat /run/secrets/bitbucket_pw)@bitbucket.org/cmriprocan/ruviii_c.git  \
  && cd ruviii_c \
  && git remote set-url origin https://bitbucket.org/cmriprocan/ruviii_c.git \
  && R CMD INSTALL . \

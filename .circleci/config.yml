@@ -13,7 +13,7 @@ variables:
         apt install -y gnupg curl
 
         VER=18.09.3
-        curl -L -o /tmp/docker-$VER.tgz https://get.docker.com/builds/Linux/x86_64/docker-$VER.tgz
+        curl -L -o /tmp/docker-$VER.tgz https://download.docker.com/linux/static/stable/x86_64/docker-$VER.tgz
         tar -xz -C /tmp -f /tmp/docker-$VER.tgz
         mv /tmp/docker/* /usr/bin       
 
@@ -27,7 +27,7 @@ variables:
     run:
       name: Testing package
       command: |
-        cd tests && R -e "source('./testthat.R')"
+        cd tests && R -e "source('./testthat.R')" && cd ..
 
   version_info: &version_info
     run:
@@ -62,13 +62,12 @@ variables:
         sh +x -c 'echo $DOCKER_PASSWORD' | docker login -u ${DOCKER_USER} --password-stdin
 
         echo $BITBUCKET_PASSWORD > bitbucket_pw.txt
-        echo $ANACONDA_PASSWORD > anaconda_pw.txt
 
         DOCKER_BUILDKIT=1 docker build \
           --network host \
-          --secret \
-          id=gitpassword,src=$(pwd)/gitpassword.txt \
-          -t ${DOCKER_FLAG} docker/Dockerfile
+          --build-arg bitbucket_user="${BITBUCKET_USER}" \
+          --secret id=bitbucket_pw,src=$(pwd)/bitbucket_pw.txt \
+          -t ${DOCKER_FLAG} docker
   
   publish: &publish
     run:

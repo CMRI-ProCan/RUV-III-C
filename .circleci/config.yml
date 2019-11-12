@@ -9,8 +9,8 @@ variables:
     run:
       name: Setting up build environment
       command: |
-        sudo apt update
-        sudo apt install -y gnupg curl
+        apt update
+        apt install -y gnupg curl
 
         VER=18.09.3
         curl -L -o /tmp/docker-$VER.tgz https://get.docker.com/builds/Linux/x86_64/docker-$VER.tgz

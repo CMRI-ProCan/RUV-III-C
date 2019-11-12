@@ -57,11 +57,6 @@ RUN --mount=type=secret,id=bitbucket_pw cd / \
  && cd .. \
  && rm -rf ./ruviii_c
 
-RUN cd / \
- && git clone https://github.com/rohan-shah/ruv.git \
- && R CMD INSTALL /ruv \
- && rm -r /ruv
-
 # Install Tini
 RUN wget --quiet https://github.com/krallin/tini/releases/download/v0.10.0/tini \
  && echo "1361527f39190a7338a0b434bd8c88ff7233ce7b9a4876f3315c22fce7eca1b0 *tini" | sha256sum -c - \

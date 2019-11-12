@@ -1,1 +1,5 @@
-DOCKER_BUILDKIT=1 docker build --network host --secret id=gitpassword,src=$(pwd)/gitpassword.txt .
+DOCKER_BUILDKIT=1 docker build \
+  --network host \
+  --build-arg bitbucket_user="${BITBUCKET_USER}" \
+  --secret id=gitpassword,src=$(pwd)/gitpassword.txt \
+  docker/Dockerfile

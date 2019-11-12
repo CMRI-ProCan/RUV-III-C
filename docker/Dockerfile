@@ -7,6 +7,8 @@ FROM ubuntu:18.04
 
 USER root
 
+ARG bitbucket_user
+
 ENV DEBIAN_FRONTEND noninteractive
 
 COPY docker/packages.txt .
@@ -28,7 +30,7 @@ RUN rm Rpackages.txt
 RUN R -e "source('https://bioconductor.org/biocLite.R'); biocLite('sva'); biocLite('preprocessCore')"
 
 RUN --mount=type=secret,id=gitpassword cd / \
- && git clone https://rshah-cmri:$(cat /run/secrets/gitpassword)@bitbucket.org/cmriprocan/ruviii_c.git  \
+ && git clone https://${bitbucket_user}:$(cat /run/secrets/gitpassword)@bitbucket.org/cmriprocan/ruviii_c.git  \
  && cd ruviii_c \
  && git remote set-url origin https://bitbucket.org/cmriprocan/ruviii_c.git \
  && R CMD INSTALL . \

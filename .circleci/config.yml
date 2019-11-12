@@ -62,11 +62,11 @@ variables:
         sh +x -c 'echo $DOCKER_PASSWORD' | docker login -u ${DOCKER_USER} --password-stdin
 
         echo $BITBUCKET_PASSWORD > bitbucket_pw.txt
-        echo $ANACONDA_PASSWORD > anaconda_pw.txt
 
         DOCKER_BUILDKIT=1 docker build \
           --network host \
           --secret \
+          --build-arg bitbucket_user="${BITBUCKET_USER}" \
           id=gitpassword,src=$(pwd)/gitpassword.txt \
           -t ${DOCKER_FLAG} docker/Dockerfile
   

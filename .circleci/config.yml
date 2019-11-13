@@ -69,7 +69,7 @@ variables:
           git remote set-url origin https://${BITBUCKET_USER}:${BITBUCKET_PASSWORD}@bitbucket.org/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}.git
           git config --global user.email "procansoftengrobot@cmri.com.au"
           git config --global user.name "ProCan Soft Eng Robot"
-          git diff --quiet version || git commit version -m "[skip ci] ${IMAGE} updated to ${VERSION}"
+          git diff --quiet version || git commit version DESCRIPTION -m "[skip ci] ${IMAGE} updated to ${VERSION}"
 
           git tag ${NEW_GIT_TAG}
 

@@ -3,7 +3,7 @@
 # Copyright (c) CMRI-ProCan Team.
 # Distributed under the terms of the Modified BSD License.
 
-FROM cmriprocan/ruviii_c-base:0.0.1
+FROM ubuntu:18.04
 
 USER root
 
@@ -21,7 +21,7 @@ RUN rm packages.txt
 
 COPY Rpackages.txt .
 
-RUN R -e "packages <- read.table('./Rpackages.txt', stringsAsFactors=FALSE); install.packages(packages[,1], repos = 'https://mirror.aarnet.edu.au/pub/CRAN/');"
+RUN R -e "packages <- read.table('./Rpackages.txt', stringsAsFactors=FALSE); install.packages(packages[,1]);"
 
 RUN rm Rpackages.txt
 

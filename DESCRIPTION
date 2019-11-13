@@ -1,8 +1,8 @@
 Package: RUVIIIC
 Type: Package
 Title: RUV-III-C
-Version: 0.0.1
-Date: 2019-09-09
+Version: 1.0.5
+Date: 2019-11-13
 Author: Rohan Shah
 Maintainer: Rohan Shah <rshah@cmri.org.au>
 Description: Variations of RUV-III which perform normalisation based only on the non-missing values. Originally designed for SWATH-MS proteomics datasets. 

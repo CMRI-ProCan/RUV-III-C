@@ -55,7 +55,7 @@ variables:
           --network host \
           --build-arg bitbucket_user="${BITBUCKET_USER}" \
           --secret id=bitbucket_pw,src=$(pwd)/bitbucket_pw.txt \
-          -t ${DOCKER_FLAG} docker
+          -t ${DOCKER_FLAG} docker/ruviii_c
   
   publish: &publish
     run:

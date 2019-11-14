@@ -202,8 +202,11 @@ Rcpp::NumericMatrix RUVIIIC_Varying(Rcpp::NumericMatrix input, int k, Rcpp::Nume
 					{
 						#pragma omp critical
 						{
-							foundError = true;
-							std::cout << "Not enough eigenvalues converged for variable " << currentToCorrect << std::endl;
+							std::cout << "Not enough eigenvalues converged for variable " << currentToCorrect << ", this variable was not normalised." << std::endl;
+							for(int row = 0; row < nRows; row++)
+							{
+								resultsAsEigen(row, i) = std::numeric_limits<double>::quiet_NaN();
+							}
 						}
 					}
 					else
@@ -245,8 +248,7 @@ Rcpp::NumericMatrix RUVIIIC_Varying(Rcpp::NumericMatrix input, int k, Rcpp::Nume
 				{
 					#pragma omp critical
 					{
-						foundError = true;
-						std::cout << "Error in eigen decomposition for marker " << currentToCorrect << std::endl;
+						std::cout << "Error in eigen decomposition for variable " << currentToCorrect << ", this variable was not normalised." << std::endl;
 						for(int row = 0; row < nRows; row++)
 						{
 							resultsAsEigen(row, i) = std::numeric_limits<double>::quiet_NaN();

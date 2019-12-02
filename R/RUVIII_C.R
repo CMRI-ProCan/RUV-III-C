@@ -15,16 +15,16 @@
 #' The R implementation of this function takes an optional intermediate filename, used to store the results. If the function is run again, the previously computed results are loaded directly from the intermediate file, without checking if the inputs specified to the function are the same as those used to generate the previous intermediate result. To re-run a computation, the intermediate file must be deleted. If the intermediate filename is set to NULL, no intermediate file is used. The C++ implementation never saves an intermediate file. 
 #' 
 #' @param k The number of factors of unwanted variation to remove
-#' @param ruvInputData The input data matrix. Must be a matrix, not a data.frame. It should contain missing (NA) values, rather than zeros. No additional transformation is applied to the input data. 
+#' @param Y The input data matrix. Must be a matrix, not a data.frame. It should contain missing (NA) values, rather than zeros. No additional transformation is applied to the input data. 
 #' @param M The design matrix containing information about technical replicates. It should not contain an intercept term!
 #' @param toCorrect The names of the variables to correct using RUV-III-C
 #' @param filename The intermediate file in which to save the results, in the R version. Set to NULL to not use an intermediate file. The C++ version never saves an intermediate file. 
 #' @param controls The names of the control variables which are known to be constant across the observations
-#' @param withW Should we keep the estimate of the unwanted variation factors W, for each variable which is corrected?
+#' @param withExtra Should we keep the estimate of the unwanted variation factors W, for each variable which is corrected?
 #' @param batchSize How often should we write to the intermediate file? The default of 1000 implies that results are written to file every 1000 variables. 
 #' @param version The version of the underlying code to use. Must be either "CPP" or "R"
 #'
-#' @return If withW = FALSE, returns a matrix. If withW = TRUE, returns a list with entries named \code{newY} and \code{W}.
+#' @return If withExtra = FALSE, returns a matrix. If withExtra = TRUE, returns a list with entries named \code{newY}, \code{residualDimensions} and \code{W}.
 #'
 #' @examples
 #' data(crossLab)
@@ -43,24 +43,24 @@
 #' #Because there are so many potential controls here, we only use 500. 
 #' actualControls <- head(potentialControlsAlwaysFound, 500)
 #' #Actually run correction
-#' \dontrun{results <- RUVIII_C_R(k = 11, ruvInputData = onlyPeptideData, M = M, toCorrect = c(sisPeptides, actualControls), controls = actualControls, filename = "results.RData")}
+#' \dontrun{results <- RUVIII_C_R(k = 11, Y = onlyPeptideData, M = M, toCorrect = c(sisPeptides, actualControls), controls = actualControls, filename = "results.RData")}
 #' @export
-RUVIII_C <- function(k, ruvInputData, M, toCorrect, filename, controls, withW = FALSE, batchSize = 1000, version = "CPP")
+RUVIII_C <- function(k, Y, M, toCorrect, filename, controls, withExtra = FALSE, batchSize = 1000, version = "CPP")
 {
 	if(version == "CPP")
 	{
-		return(RUVIII_C_CPP(k = k, input = ruvInputData, M = M, toCorrect = toCorrect, controls = controls, withW = withW))
+		return(RUVIII_C_CPP(k = k, input = Y, M = M, toCorrect = toCorrect, controls = controls, withExtra = withExtra))
 	}
 	else if(version == "R")
 	{
-		return(RUVIII_C_R(k = k, ruvInputData = ruvInputData, M = M, toCorrect = toCorrect, filename = filename, controls = controls, withW = withW, batchSize = batchSize))
+		return(RUVIII_C_R(k = k, ruvInputData = Y, M = M, toCorrect = toCorrect, filename = filename, controls = controls, withExtra = withExtra, batchSize = batchSize))
 	}
 	else
 	{
 		stop("version must be either 'CPP' or 'R'")
 	}
 }
-RUVIII_C_R <- function(k, ruvInputData, M, toCorrect, filename, controls, withW = FALSE, batchSize = 1000)
+RUVIII_C_R <- function(k, ruvInputData, M, toCorrect, filename, controls, withExtra = FALSE, batchSize = 1000)
 {
 	if(missing(filename))
 	{
@@ -147,14 +147,14 @@ RUVIII_C_R <- function(k, ruvInputData, M, toCorrect, filename, controls, withW 
 						results$alphaResults[peptide] <- list(c())
 						results$peptideResults[[peptide]] <- rep(as.numeric(NA), nrow(ruvInputData))
 						names(results$peptideResults[[peptide]]) <- rownames(ruvInputDataWithoutNA)
-						if(withW) results$W[peptide] <- list(c())
+						if(withExtra) results$W[peptide] <- list(c())
 						next
 					}
 					#If the dimensions don't work, we can't correct this variable
 					if(min(residualDimensions, length(controls)) < k)
 					{
 						newComputation <- TRUE
-						if(withW)
+						if(withExtra)
 						{
 							results$alphaResults[peptide] <- list(c())
 							results$peptideResults[peptide] <- list(c())
@@ -180,7 +180,7 @@ RUVIII_C_R <- function(k, ruvInputData, M, toCorrect, filename, controls, withW 
 						names(adjusted) <- rownames(ruvInputDataWithoutNA)
 						results$peptideResults[[peptide]] <- adjusted
 						results$alphaResults[[peptide]] <- t(Uk) %*% submatrix
-						if(withW)
+						if(withExtra)
 						{
 							results$W[[peptide]] <- matrix(nrow = nrow(ruvInputDataWithoutNA), ncol = k)
 							results$W[[peptide]][indices, ] <- productControls %*% Uk %*% solve(t(Uk) %*% productControls %*% Uk)
@@ -206,7 +206,7 @@ RUVIII_C_R <- function(k, ruvInputData, M, toCorrect, filename, controls, withW 
 
 							results$alphaResults[[peptide]] <- currentResult
 							results$peptideResults[[peptide]] <- adjusted
-							if(withW)
+							if(withExtra)
 							{
 								results$W[[peptide]] <- rep(as.numeric(NA), nrow(ruvInputDataWithoutNA))
 								results$W[[peptide]][indices] <- currentPeptideW
@@ -244,7 +244,7 @@ RUVIII_C_R <- function(k, ruvInputData, M, toCorrect, filename, controls, withW 
 		#If we've made any new computations write out to file. 
 		if(newComputation && !is.null(filename)) save(results, file = filename)
 	}
-	if(withW)
+	if(withExtra)
 	{
 		return(list(newY = do.call(cbind, results$peptideResults), W = results$W, alpha = results$alphaResults, residualDimensions = results$residualDimensions))
 	}

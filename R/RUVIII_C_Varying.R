@@ -9,7 +9,7 @@
 #' There are two implementations of this function, one in C++ and one in R. Select which version using the \code{version} argument, which must be either "CPP" or "R"
 #' 
 #' @param k The number of factors of unwanted variation to remove
-#' @param ruvInputData The input data matrix. Must be a matrix, not a data.frame. It should contain missing (NA) values, rather than zeros. 
+#' @param Y The input data matrix. Must be a matrix, not a data.frame. It should contain missing (NA) values, rather than zeros. 
 #' @param M The design matrix containing information about technical replicates. It should not contain an intercept term!
 #' @param toCorrect The names of the variables to correct using RUV-III-C
 #' @param filename The intermediate file in which to save the results. 
@@ -21,15 +21,15 @@
 #' @return If withW = FALSE, returns a matrix. If withW = TRUE, returns a list with entries named \code{newY} and \code{W}.
 #'
 #' @export
-RUVIII_C_Varying <- function(k, ruvInputData, M, toCorrect, filename, potentialControls, withW = FALSE, batchSize = 1000, version = "CPP")
+RUVIII_C_Varying <- function(k, Y, M, toCorrect, filename, potentialControls, withW = FALSE, batchSize = 1000, version = "CPP")
 {
 	if(version == "CPP")
 	{
-		return(RUVIII_C_Varying_CPP(k = k, input = ruvInputData, M = M, toCorrect = toCorrect, potentialControls = potentialControls, withW = withW))
+		return(RUVIII_C_Varying_CPP(k = k, input = Y, M = M, toCorrect = toCorrect, potentialControls = potentialControls, withW = withW))
 	}
 	else if(version == "R")
 	{
-		return(RUVIII_C_Varying_R(k = k, ruvInputData = ruvInputData, M = M, toCorrect = toCorrect, filename = filename, potentialControls = potentialControls, withW = withW, batchSize = batchSize))
+		return(RUVIII_C_Varying_R(k = k, ruvInputData = Y, M = M, toCorrect = toCorrect, filename = filename, potentialControls = potentialControls, withW = withW, batchSize = batchSize))
 	}
 	else
 	{

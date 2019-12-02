@@ -102,6 +102,10 @@ RUVIII_C_Varying_R <- function(k, ruvInputData, M, toCorrect, filename, potentia
 					Msubset <- M[indices, , drop = F]
 					#Some whole biological replicates are removed in the process. So remove those entire columns. This has consequences for the dimension tests later on. 
 					Msubset <- Msubset[, apply(Msubset, 2, function(x) sum(x) > 0), drop=F]
+					#Number of observations
+					m <- nrow(submatrix)
+					residualDimensions <- m - ncol(Msubset)
+					results$residualDimensions[peptide] <- residualDimensions
 					#You need at least two observations, across two different biological samples, in ordor to make any kind of correction
 					if(ncol(Msubset) < 2 || nrow(Msubset) < 2) 
 					{
@@ -113,10 +117,6 @@ RUVIII_C_Varying_R <- function(k, ruvInputData, M, toCorrect, filename, potentia
 						if(withW) results$W[peptide] <- list(c())
 						next
 					}
-					#Number of observations
-					m <- nrow(submatrix)
-					residualDimensions <- m - ncol(Msubset)
-					results$residualDimensions[peptide] <- residualDimensions
 					#If the dimensions don't work, we can't correct this variable
 					if(min(residualDimensions, length(controlsThisPeptide)) < k)
 					{

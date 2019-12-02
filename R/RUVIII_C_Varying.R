@@ -40,7 +40,7 @@ RUVIII_C_Varying_R <- function(k, ruvInputData, M, toCorrect, filename, potentia
 {
 	if(missing(filename))
 	{
-		stop("Function RUVIII_NM_Varying requires a filename for intermediate results, or NULL if an intermediate file should not be used")
+		stop("Function RUVIII_C_Varying requires a filename for intermediate results, or NULL if an intermediate file should not be used")
 	}
 	if(k <= 0)
 	{
@@ -64,6 +64,10 @@ RUVIII_C_Varying_R <- function(k, ruvInputData, M, toCorrect, filename, potentia
 
 	results <- list()
 	results$peptideResults <- results$alphaResults <- results$W <- list()
+
+	results$residualDimensions <- vector(mode = "integer", length = length(toCorrect))
+	names(results$residualDimensions) <- toCorrect
+	results$residualDimensions[] <- -1L
 
 	#Load previous results set. 
 	if(!is.null(filename) && file.exists(filename))
@@ -98,6 +102,10 @@ RUVIII_C_Varying_R <- function(k, ruvInputData, M, toCorrect, filename, potentia
 					Msubset <- M[indices, , drop = F]
 					#Some whole biological replicates are removed in the process. So remove those entire columns. This has consequences for the dimension tests later on. 
 					Msubset <- Msubset[, apply(Msubset, 2, function(x) sum(x) > 0), drop=F]
+					#Number of observations
+					m <- nrow(submatrix)
+					residualDimensions <- m - ncol(Msubset)
+					results$residualDimensions[peptide] <- residualDimensions
 					#You need at least two observations, across two different biological samples, in ordor to make any kind of correction
 					if(ncol(Msubset) < 2 || nrow(Msubset) < 2) 
 					{
@@ -109,20 +117,18 @@ RUVIII_C_Varying_R <- function(k, ruvInputData, M, toCorrect, filename, potentia
 						if(withW) results$W[peptide] <- list(c())
 						next
 					}
-					#Number of observations
-					m <- nrow(submatrix)
 					#If the dimensions don't work, we can't correct this variable
-					if(min(m - ncol(Msubset), length(controlsThisPeptide)) < k)
+					if(min(residualDimensions, length(controlsThisPeptide)) < k)
 					{
 						newComputation <- TRUE
 						results$alphaResults[peptide] <- list(c())
 						results$peptideResults[[peptide]] <- rep(as.numeric(NA), nrow(ruvInputData))
 						names(results$peptideResults[[peptide]]) <- rownames(ruvInputDataWithoutNA)
-						if(withW) results$W[peptide] <- list(c())
+						results$W[peptide] <- list(c())
 						next
 					}
 					#In the special case that we're trying to remove the maximum possible number of factors from this peptide, the eigen decomposition seems like it can be unstable. Fortunately, there is also the simpler GLS formulation, which may avoid those problems. 
-					else if(m - ncol(Msubset) == k)
+					else if(residualDimensions == k)
 					{
 						#Use only the columns of Msubset that have one or more replicates to get out alphaHat
 						orthogonalProjection <- diag(1, m) - Msubset %*% solve(t(Msubset) %*% Msubset) %*% t(Msubset)
@@ -179,7 +185,7 @@ RUVIII_C_Varying_R <- function(k, ruvInputData, M, toCorrect, filename, potentia
 					results$alphaResults[peptide] <- list(c())
 					results$peptideResults[[peptide]] <- rep(as.numeric(NA), nrow(ruvInputData))
 					names(results$peptideResults[[peptide]]) <- rownames(ruvInputDataWithoutNA)
-					if(withW) results$W[peptide] <- list(c())
+					results$W[peptide] <- list(c())
 				}
 			}
 			#This case only triggers if there is an exception in the try() above. 
@@ -189,7 +195,7 @@ RUVIII_C_Varying_R <- function(k, ruvInputData, M, toCorrect, filename, potentia
 				results$alphaResults[peptide] <- list(c())
 				results$peptideResults[[peptide]] <- rep(as.numeric(NA), nrow(ruvInputData))
 				names(results$peptideResults[[peptide]]) <- rownames(ruvInputDataWithoutNA)
-				if(withW) results$W[peptide] <- list(c())
+				results$W[peptide] <- list(c())
 			}
 			#If we've hit the batch size, and we've actually made a new computation, write out to the temporary file. 
 			if(peptideIndex %% batchSize == 0 && newComputation && !is.null(filename))
@@ -205,7 +211,7 @@ RUVIII_C_Varying_R <- function(k, ruvInputData, M, toCorrect, filename, potentia
 	}
 	if(withW)
 	{
-		return(list(newY = do.call(cbind, results$peptideResults), W = results$W, alpha = results$alpha))
+		return(list(newY = do.call(cbind, results$peptideResults), W = results$W, alpha = results$alpha, residualDimensions = results$residualDimensions))
 	}
 	else
 	{

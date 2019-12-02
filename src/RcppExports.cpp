@@ -7,7 +7,7 @@
 using namespace Rcpp;
 
 // RUVIIIC
-Rcpp::NumericMatrix RUVIIIC(Rcpp::NumericMatrix input, int k, Rcpp::NumericMatrix M, Rcpp::CharacterVector controls, Rcpp::CharacterVector toCorrect, bool withW);
+Rcpp::RObject RUVIIIC(Rcpp::NumericMatrix input, int k, Rcpp::NumericMatrix M, Rcpp::CharacterVector controls, Rcpp::CharacterVector toCorrect, bool withW);
 RcppExport SEXP _RUVIIIC_RUVIIIC(SEXP inputSEXP, SEXP kSEXP, SEXP MSEXP, SEXP controlsSEXP, SEXP toCorrectSEXP, SEXP withWSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -23,7 +23,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // RUVIIIC_Varying
-Rcpp::NumericMatrix RUVIIIC_Varying(Rcpp::NumericMatrix input, int k, Rcpp::NumericMatrix M, Rcpp::CharacterVector controls, Rcpp::CharacterVector toCorrect, bool withW);
+Rcpp::RObject RUVIIIC_Varying(Rcpp::NumericMatrix input, int k, Rcpp::NumericMatrix M, Rcpp::CharacterVector controls, Rcpp::CharacterVector toCorrect, bool withW);
 RcppExport SEXP _RUVIIIC_RUVIIIC_Varying(SEXP inputSEXP, SEXP kSEXP, SEXP MSEXP, SEXP controlsSEXP, SEXP toCorrectSEXP, SEXP withWSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;

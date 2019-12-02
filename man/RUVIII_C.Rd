@@ -4,13 +4,13 @@
 \alias{RUVIII_C}
 \title{RUV-III-C}
 \usage{
-RUVIII_C(k, ruvInputData, M, toCorrect, filename, controls,
-  withW = FALSE, batchSize = 1000, version = "CPP")
+RUVIII_C(k, Y, M, toCorrect, filename, controls, withExtra = FALSE,
+  batchSize = 1000, version = "CPP")
 }
 \arguments{
 \item{k}{The number of factors of unwanted variation to remove}
 
-\item{ruvInputData}{The input data matrix. Must be a matrix, not a data.frame. It should contain missing (NA) values, rather than zeros. No additional transformation is applied to the input data.}
+\item{Y}{The input data matrix. Must be a matrix, not a data.frame. It should contain missing (NA) values, rather than zeros. No additional transformation is applied to the input data.}
 
 \item{M}{The design matrix containing information about technical replicates. It should not contain an intercept term!}
 
@@ -20,14 +20,14 @@ RUVIII_C(k, ruvInputData, M, toCorrect, filename, controls,
 
 \item{controls}{The names of the control variables which are known to be constant across the observations}
 
-\item{withW}{Should we keep the estimate of the unwanted variation factors W, for each variable which is corrected?}
+\item{withExtra}{Should we keep the estimate of the unwanted variation factors W, for each variable which is corrected?}
 
 \item{batchSize}{How often should we write to the intermediate file? The default of 1000 implies that results are written to file every 1000 variables.}
 
 \item{version}{The version of the underlying code to use. Must be either "CPP" or "R"}
 }
 \value{
-If withW = FALSE, returns a matrix. If withW = TRUE, returns a list with entries named \code{newY} and \code{W}.
+If withExtra = FALSE, returns a matrix. If withExtra = TRUE, returns a list with entries named \code{newY}, \code{residualDimensions} and \code{W}.
 }
 \description{
 Apply RUV-III-C, a variation of RUV-III that only uses non-missing values
@@ -62,5 +62,5 @@ potentialControlsAlwaysFound <- names(which(apply(onlyPeptideData[, potentialCon
 #Because there are so many potential controls here, we only use 500. 
 actualControls <- head(potentialControlsAlwaysFound, 500)
 #Actually run correction
-\dontrun{results <- RUVIII_C_R(k = 11, ruvInputData = onlyPeptideData, M = M, toCorrect = c(sisPeptides, actualControls), controls = actualControls, filename = "results.RData")}
+\dontrun{results <- RUVIII_C_R(k = 11, Y = onlyPeptideData, M = M, toCorrect = c(sisPeptides, actualControls), controls = actualControls, filename = "results.RData")}
 }

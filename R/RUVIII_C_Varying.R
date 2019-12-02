@@ -9,34 +9,34 @@
 #' There are two implementations of this function, one in C++ and one in R. Select which version using the \code{version} argument, which must be either "CPP" or "R"
 #' 
 #' @param k The number of factors of unwanted variation to remove
-#' @param ruvInputData The input data matrix. Must be a matrix, not a data.frame. It should contain missing (NA) values, rather than zeros. 
+#' @param Y The input data matrix. Must be a matrix, not a data.frame. It should contain missing (NA) values, rather than zeros. 
 #' @param M The design matrix containing information about technical replicates. It should not contain an intercept term!
 #' @param toCorrect The names of the variables to correct using RUV-III-C
 #' @param filename The intermediate file in which to save the results. 
 #' @param potentialControls The names of the control variables which are known to be constant across the observations
-#' @param withW Should we keep the estimate of the unwanted variation factors W, for each variable which is corrected?
+#' @param withExtra Should we keep the estimate of the unwanted variation factors W, for each variable which is corrected?
 #' @param batchSize How often should we write to the intermediate file? The default of 1000 implies that results are written to file every 1000 variables. 
 #' @param version The version of the underlying code to use. Must be either "CPP" or "R"
 #'
-#' @return If withW = FALSE, returns a matrix. If withW = TRUE, returns a list with entries named \code{newY} and \code{W}.
+#' @return If withExtra = FALSE, returns a matrix. If withExtra = TRUE, returns a list with entries named \code{newY}, \code{residualDimensions} and \code{W}.
 #'
 #' @export
-RUVIII_C_Varying <- function(k, ruvInputData, M, toCorrect, filename, potentialControls, withW = FALSE, batchSize = 1000, version = "CPP")
+RUVIII_C_Varying <- function(k, Y, M, toCorrect, filename, potentialControls, withExtra = FALSE, batchSize = 1000, version = "CPP")
 {
 	if(version == "CPP")
 	{
-		return(RUVIII_C_Varying_CPP(k = k, input = ruvInputData, M = M, toCorrect = toCorrect, potentialControls = potentialControls, withW = withW))
+		return(RUVIII_C_Varying_CPP(k = k, Y = Y, M = M, toCorrect = toCorrect, potentialControls = potentialControls, withExtra = withExtra))
 	}
 	else if(version == "R")
 	{
-		return(RUVIII_C_Varying_R(k = k, ruvInputData = ruvInputData, M = M, toCorrect = toCorrect, filename = filename, potentialControls = potentialControls, withW = withW, batchSize = batchSize))
+		return(RUVIII_C_Varying_R(k = k, Y = Y, M = M, toCorrect = toCorrect, filename = filename, potentialControls = potentialControls, withExtra = withExtra, batchSize = batchSize))
 	}
 	else
 	{
 		stop("version must be either 'CPP' or 'R'")
 	}
 }
-RUVIII_C_Varying_R <- function(k, ruvInputData, M, toCorrect, filename, potentialControls, withW = FALSE, batchSize = 1000)
+RUVIII_C_Varying_R <- function(k, Y, M, toCorrect, filename, potentialControls, withExtra = FALSE, batchSize = 1000)
 {
 	if(missing(filename))
 	{
@@ -46,11 +46,11 @@ RUVIII_C_Varying_R <- function(k, ruvInputData, M, toCorrect, filename, potentia
 	{
 		stop("Input k, the number of factors of unwanted variation, must be positive")
 	}
-	if(is.null(rownames(ruvInputData)))
+	if(is.null(rownames(Y)))
 	{
-		stop("Function RUVIII_NM_Varying requires row-names for input ruvInputData")
+		stop("Function RUVIII_NM_Varying requires row-names for input Y")
 	}
-	if(k >= nrow(ruvInputData))
+	if(k >= nrow(Y))
 	{
 		stop("Input k cannot be larger than or equal to the number of rows in the input matrix")
 	}
@@ -59,8 +59,8 @@ RUVIII_C_Varying_R <- function(k, ruvInputData, M, toCorrect, filename, potentia
 		stop("Input k cannot be larger than the number of negative controls")
 	}
 	#Replace NAs with 0
-	ruvInputDataWithoutNA <- ruvInputData
-	ruvInputDataWithoutNA[is.na(ruvInputDataWithoutNA)] <- 0
+	YWithoutNA <- Y
+	YWithoutNA[is.na(YWithoutNA)] <- 0
 
 	results <- list()
 	results$peptideResults <- results$alphaResults <- results$W <- list()
@@ -76,7 +76,7 @@ RUVIII_C_Varying_R <- function(k, ruvInputData, M, toCorrect, filename, potentia
 	}
 	pb <- progress_bar$new(total = length(toCorrect), format = "[:bar] :percent :eta")
 
-	symmetrised <- ruvInputDataWithoutNA %*% t(ruvInputDataWithoutNA)
+	symmetrised <- YWithoutNA %*% t(YWithoutNA)
 	#Don't bother writing anything to file, if there are no new computations. 
 	newComputation <- FALSE
 	if(length(results$peptideResults) != length(toCorrect) || any(sort(names(results$peptideResults)) != sort(toCorrect)))
@@ -87,17 +87,17 @@ RUVIII_C_Varying_R <- function(k, ruvInputData, M, toCorrect, filename, potentia
 			if(!(peptide %in% names(results$peptideResults)))
 			{
 				#row indices of the rows which have actual values
-				indices <- which(!is.na(ruvInputData[,peptide]))
+				indices <- which(!is.na(Y[,peptide]))
 				#Find the controls which are non-missing, for those rows. 
-				controlsThisPeptide <- names(which(apply(ruvInputData[indices, potentialControls, drop = F], 2, function(x) sum(is.na(x)) == 0)))
+				controlsThisPeptide <- names(which(apply(Y[indices, potentialControls, drop = F], 2, function(x) sum(is.na(x)) == 0)))
 				#If there are no non-missing observations, then we can just mark this peptide as uncorrected / uncorrectable
 				if(length(indices) > 0)
 				{
 					#Create the matrix that select rows of the input data matrix
-					selectRows <- matrix(0, nrow = length(indices), ncol = nrow(ruvInputDataWithoutNA))
+					selectRows <- matrix(0, nrow = length(indices), ncol = nrow(YWithoutNA))
 					selectRows[cbind(1:length(indices), indices)] <- 1
 					#Submatrix of the entire data matrix
-					submatrix <- ruvInputDataWithoutNA[indices, , drop = F]
+					submatrix <- YWithoutNA[indices, , drop = F]
 					#Submatrix of the replicate matrix
 					Msubset <- M[indices, , drop = F]
 					#Some whole biological replicates are removed in the process. So remove those entire columns. This has consequences for the dimension tests later on. 
@@ -112,9 +112,9 @@ RUVIII_C_Varying_R <- function(k, ruvInputData, M, toCorrect, filename, potentia
 						#Mark this peptide as uncorrected / uncorrectable.
 						newComputation <- TRUE
 						results$alphaResults[peptide] <- list(c())
-						results$peptideResults[[peptide]] <- rep(as.numeric(NA), nrow(ruvInputData))
-						names(results$peptideResults[[peptide]]) <- rownames(ruvInputDataWithoutNA)
-						if(withW) results$W[peptide] <- list(c())
+						results$peptideResults[[peptide]] <- rep(as.numeric(NA), nrow(Y))
+						names(results$peptideResults[[peptide]]) <- rownames(YWithoutNA)
+						if(withExtra) results$W[peptide] <- list(c())
 						next
 					}
 					#If the dimensions don't work, we can't correct this variable
@@ -122,8 +122,8 @@ RUVIII_C_Varying_R <- function(k, ruvInputData, M, toCorrect, filename, potentia
 					{
 						newComputation <- TRUE
 						results$alphaResults[peptide] <- list(c())
-						results$peptideResults[[peptide]] <- rep(as.numeric(NA), nrow(ruvInputData))
-						names(results$peptideResults[[peptide]]) <- rownames(ruvInputDataWithoutNA)
+						results$peptideResults[[peptide]] <- rep(as.numeric(NA), nrow(Y))
+						names(results$peptideResults[[peptide]]) <- rownames(YWithoutNA)
 						results$W[peptide] <- list(c())
 						next
 					}
@@ -139,15 +139,15 @@ RUVIII_C_Varying_R <- function(k, ruvInputData, M, toCorrect, filename, potentia
 						productControls <- submatrix[, controlsThisPeptide] %*% t(submatrix[, controlsThisPeptide])
 						invMatrix <- solve(productControls)
 
-						adjusted <- vector(mode = "numeric", length = nrow(ruvInputDataWithoutNA))
+						adjusted <- vector(mode = "numeric", length = nrow(YWithoutNA))
 						adjusted[] <- NA
 						adjusted[indices] <- Msubset %*% solve(t(Msubset) %*% invMatrix %*% Msubset) %*% t(Msubset) %*% invMatrix %*% submatrix[, peptide]
-						names(adjusted) <- rownames(ruvInputDataWithoutNA)
+						names(adjusted) <- rownames(YWithoutNA)
 						results$peptideResults[[peptide]] <- adjusted
 						results$alphaResults[[peptide]] <- t(Uk) %*% submatrix
-						if(withW)
+						if(withExtra)
 						{
-							results$W[[peptide]] <- matrix(nrow = nrow(ruvInputDataWithoutNA), ncol = k)
+							results$W[[peptide]] <- matrix(nrow = nrow(YWithoutNA), ncol = k)
 							results$W[[peptide]][indices, ] <- productControls %*% Uk %*% solve(t(Uk) %*% productControls %*% Uk)
 						}
 					}
@@ -164,16 +164,16 @@ RUVIII_C_Varying_R <- function(k, ruvInputData, M, toCorrect, filename, potentia
 							currentResult <- fullalpha[1:k, peptide]
 
 							#Now we extend the corrected results out to a full matrix. 
-							adjusted <- vector(mode = "numeric", length = nrow(ruvInputDataWithoutNA))
+							adjusted <- vector(mode = "numeric", length = nrow(YWithoutNA))
 							adjusted[] <- NA
 							adjusted[indices] <- submatrix[,peptide, drop=F] - currentPeptideW %*% cbind(currentResult)
-							names(adjusted) <- rownames(ruvInputDataWithoutNA)
+							names(adjusted) <- rownames(YWithoutNA)
 
 							results$alphaResults[[peptide]] <- currentResult
 							results$peptideResults[[peptide]] <- adjusted
-							if(withW)
+							if(withExtra)
 							{
-								results$W[[peptide]] <- rep(as.numeric(NA), nrow(ruvInputDataWithoutNA))
+								results$W[[peptide]] <- rep(as.numeric(NA), nrow(YWithoutNA))
 								results$W[[peptide]][indices] <- currentPeptideW
 							}
 							newComputation <- TRUE
@@ -183,8 +183,8 @@ RUVIII_C_Varying_R <- function(k, ruvInputData, M, toCorrect, filename, potentia
 				{
 					newComputation <- TRUE
 					results$alphaResults[peptide] <- list(c())
-					results$peptideResults[[peptide]] <- rep(as.numeric(NA), nrow(ruvInputData))
-					names(results$peptideResults[[peptide]]) <- rownames(ruvInputDataWithoutNA)
+					results$peptideResults[[peptide]] <- rep(as.numeric(NA), nrow(Y))
+					names(results$peptideResults[[peptide]]) <- rownames(YWithoutNA)
 					results$W[peptide] <- list(c())
 				}
 			}
@@ -193,8 +193,8 @@ RUVIII_C_Varying_R <- function(k, ruvInputData, M, toCorrect, filename, potentia
 			{
 				newComputation <- TRUE
 				results$alphaResults[peptide] <- list(c())
-				results$peptideResults[[peptide]] <- rep(as.numeric(NA), nrow(ruvInputData))
-				names(results$peptideResults[[peptide]]) <- rownames(ruvInputDataWithoutNA)
+				results$peptideResults[[peptide]] <- rep(as.numeric(NA), nrow(Y))
+				names(results$peptideResults[[peptide]]) <- rownames(YWithoutNA)
 				results$W[peptide] <- list(c())
 			}
 			#If we've hit the batch size, and we've actually made a new computation, write out to the temporary file. 
@@ -209,7 +209,7 @@ RUVIII_C_Varying_R <- function(k, ruvInputData, M, toCorrect, filename, potentia
 		#If we've made any new computations write out to file. 
 		if(newComputation && !is.null(filename)) save(results, file = filename)
 	}
-	if(withW)
+	if(withExtra)
 	{
 		return(list(newY = do.call(cbind, results$peptideResults), W = results$W, alpha = results$alpha, residualDimensions = results$residualDimensions))
 	}

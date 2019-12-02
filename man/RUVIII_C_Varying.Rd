@@ -4,14 +4,13 @@
 \alias{RUVIII_C_Varying}
 \title{RUV-III-C, varying controls}
 \usage{
-RUVIII_C_Varying(k, ruvInputData, M, toCorrect, filename,
-  potentialControls, withW = FALSE, batchSize = 1000,
-  version = "CPP")
+RUVIII_C_Varying(k, Y, M, toCorrect, filename, potentialControls,
+  withW = FALSE, batchSize = 1000, version = "CPP")
 }
 \arguments{
 \item{k}{The number of factors of unwanted variation to remove}
 
-\item{ruvInputData}{The input data matrix. Must be a matrix, not a data.frame. It should contain missing (NA) values, rather than zeros.}
+\item{Y}{The input data matrix. Must be a matrix, not a data.frame. It should contain missing (NA) values, rather than zeros.}
 
 \item{M}{The design matrix containing information about technical replicates. It should not contain an intercept term!}
 

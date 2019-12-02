@@ -7,8 +7,8 @@
 using namespace Rcpp;
 
 // RUVIIIC
-Rcpp::RObject RUVIIIC(Rcpp::NumericMatrix input, int k, Rcpp::NumericMatrix M, Rcpp::CharacterVector controls, Rcpp::CharacterVector toCorrect, bool withW);
-RcppExport SEXP _RUVIIIC_RUVIIIC(SEXP inputSEXP, SEXP kSEXP, SEXP MSEXP, SEXP controlsSEXP, SEXP toCorrectSEXP, SEXP withWSEXP) {
+Rcpp::RObject RUVIIIC(Rcpp::NumericMatrix input, int k, Rcpp::NumericMatrix M, Rcpp::CharacterVector controls, Rcpp::CharacterVector toCorrect, bool withExtra);
+RcppExport SEXP _RUVIIIC_RUVIIIC(SEXP inputSEXP, SEXP kSEXP, SEXP MSEXP, SEXP controlsSEXP, SEXP toCorrectSEXP, SEXP withExtraSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -17,14 +17,14 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type M(MSEXP);
     Rcpp::traits::input_parameter< Rcpp::CharacterVector >::type controls(controlsSEXP);
     Rcpp::traits::input_parameter< Rcpp::CharacterVector >::type toCorrect(toCorrectSEXP);
-    Rcpp::traits::input_parameter< bool >::type withW(withWSEXP);
-    rcpp_result_gen = Rcpp::wrap(RUVIIIC(input, k, M, controls, toCorrect, withW));
+    Rcpp::traits::input_parameter< bool >::type withExtra(withExtraSEXP);
+    rcpp_result_gen = Rcpp::wrap(RUVIIIC(input, k, M, controls, toCorrect, withExtra));
     return rcpp_result_gen;
 END_RCPP
 }
 // RUVIIIC_Varying
-Rcpp::RObject RUVIIIC_Varying(Rcpp::NumericMatrix input, int k, Rcpp::NumericMatrix M, Rcpp::CharacterVector controls, Rcpp::CharacterVector toCorrect, bool withW);
-RcppExport SEXP _RUVIIIC_RUVIIIC_Varying(SEXP inputSEXP, SEXP kSEXP, SEXP MSEXP, SEXP controlsSEXP, SEXP toCorrectSEXP, SEXP withWSEXP) {
+Rcpp::RObject RUVIIIC_Varying(Rcpp::NumericMatrix input, int k, Rcpp::NumericMatrix M, Rcpp::CharacterVector controls, Rcpp::CharacterVector toCorrect, bool withExtra);
+RcppExport SEXP _RUVIIIC_RUVIIIC_Varying(SEXP inputSEXP, SEXP kSEXP, SEXP MSEXP, SEXP controlsSEXP, SEXP toCorrectSEXP, SEXP withExtraSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -33,8 +33,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type M(MSEXP);
     Rcpp::traits::input_parameter< Rcpp::CharacterVector >::type controls(controlsSEXP);
     Rcpp::traits::input_parameter< Rcpp::CharacterVector >::type toCorrect(toCorrectSEXP);
-    Rcpp::traits::input_parameter< bool >::type withW(withWSEXP);
-    rcpp_result_gen = Rcpp::wrap(RUVIIIC_Varying(input, k, M, controls, toCorrect, withW));
+    Rcpp::traits::input_parameter< bool >::type withExtra(withExtraSEXP);
+    rcpp_result_gen = Rcpp::wrap(RUVIIIC_Varying(input, k, M, controls, toCorrect, withExtra));
     return rcpp_result_gen;
 END_RCPP
 }

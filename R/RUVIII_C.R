@@ -103,7 +103,7 @@ RUVIII_C_R <- function(k, ruvInputData, M, toCorrect, filename, controls, withW 
 
 	results$residualDimensions <- vector(mode = "integer", length = length(toCorrect))
 	names(results$residualDimensions) <- toCorrect
-	results$residualDimensions[] <- -1
+	results$residualDimensions[] <- -1L
 
 	#Load previous results set. 
 	if(!is.null(filename) && file.exists(filename))
@@ -247,7 +247,7 @@ RUVIII_C_R <- function(k, ruvInputData, M, toCorrect, filename, controls, withW 
 	}
 	if(withW)
 	{
-		return(list(newY = do.call(cbind, results$peptideResults), W = results$W, alpha = results$alphaResults))
+		return(list(newY = do.call(cbind, results$peptideResults), W = results$W, alpha = results$alphaResults, residualDimensions = results$residualDimensions))
 	}
 	else
 	{

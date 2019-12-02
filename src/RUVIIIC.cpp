@@ -17,7 +17,7 @@
 ///	Gagnon-Bartsch, J. A. and Speed, T. P. (2012). Using control genes to correct for unwanted variation in microarray data. Biostatistics, 13(3), 539–552.
 ///	Gagnon-Bartsch, J. A., Jacob, L., and Speed, T. P. (2013). Removing unwanted variation from high dimensional data with negative controls.
 // [[Rcpp::export]]
-Rcpp::NumericMatrix RUVIIIC(Rcpp::NumericMatrix input, int k, Rcpp::NumericMatrix M, Rcpp::CharacterVector controls, Rcpp::CharacterVector toCorrect, bool withW)
+Rcpp::RObject RUVIIIC(Rcpp::NumericMatrix input, int k, Rcpp::NumericMatrix M, Rcpp::CharacterVector controls, Rcpp::CharacterVector toCorrect, bool withW)
 {
 	//Result matrix
 	Rcpp::NumericMatrix results(input.nrow(), toCorrect.size());
@@ -32,6 +32,10 @@ Rcpp::NumericMatrix RUVIIIC(Rcpp::NumericMatrix input, int k, Rcpp::NumericMatri
 	//Number of samples in the data matrix
 	int nRows = static_cast<int>(input.nrow());
 	int nColumns = static_cast<int>(input.ncol());
+
+	//Vector of W results, if required.
+	std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::ColMajor> > WValues(nCorrections);
+	std::vector<int> residualDimensions(nCorrections, -1);
 
 	std::vector<std::string> controlNames = Rcpp::as<std::vector<std::string> >(controls);
 	//Indices of control variables within the input matrix
@@ -124,14 +128,15 @@ Rcpp::NumericMatrix RUVIIIC(Rcpp::NumericMatrix input, int k, Rcpp::NumericMatri
 			auto submatrixMReducedColumnsView = submatrixMReducedColumns.block(0, 0, nSubmatrixRows, columnsMReduced);
 			//Create a block view of submatrixData, accounting for th efact that we're not using some of the rows. 
 			auto submatrixDataView = submatrixData.block(0, 0, nSubmatrixRows, nColumns);
+			int currentResidualDimensions = nSubmatrixRows - columnsMReduced;
 			//Check if we even have enough dimensions in the matrix to remove k factors
-			if(std::min(nSubmatrixRows - columnsMReduced, static_cast<int>(controls.size())) < k)
+			if(std::min(currentResidualDimensions, static_cast<int>(controls.size())) < k)
 			{
 				resultsAsEigen.col(i) = Eigen::VectorXd::Constant(nRows, std::numeric_limits<double>::quiet_NaN());
 				continue;
 			}
 			//In the special case that we're trying to remove the maximum possible number of factors, we can use the GLS formulation. 
-			else if (nSubmatrixRows - columnsMReduced == k)
+			else if (currentResidualDimensions == k)
 			{
 				//We need a view, to account for the fact that we're only using part of submatrixDataControls
 				auto submatrixDataControlsView = submatrixDataControls.block(0, 0, nSubmatrixRows, controls.size());
@@ -208,7 +213,7 @@ Rcpp::NumericMatrix RUVIIIC(Rcpp::NumericMatrix input, int k, Rcpp::NumericMatri
 							acView.col(controlCounter) = alpha.col(controlIndices[controlCounter]);
 							submatrixDataControlsView.col(controlCounter) = submatrixDataView.col(controlIndices[controlCounter]);
 						}
-						auto currentPeptideW = submatrixDataControlsView * acView.transpose() * (acView * acView.transpose()).inverse();
+						Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::ColMajor> currentPeptideW = submatrixDataControlsView * acView.transpose() * (acView * acView.transpose()).inverse();
 						auto corrected = submatrixDataView.col(columnIndexWithinInput) - currentPeptideW * alpha.col(columnIndexWithinInput);
 						//Now store the results. We're putting the results back into the correct places in the results matrix.
 						int correctedCounter = 0;
@@ -224,6 +229,10 @@ Rcpp::NumericMatrix RUVIIIC(Rcpp::NumericMatrix input, int k, Rcpp::NumericMatri
 								correctedCounter++;
 							}
 						}
+						if(withW)
+						{
+							WValues[i].swap(currentPeptideW);
+						}
 					}
 				}
 				catch(...)
@@ -238,8 +247,30 @@ Rcpp::NumericMatrix RUVIIIC(Rcpp::NumericMatrix input, int k, Rcpp::NumericMatri
 					}
 				}
 			}
+			if(withW)
+			{
+				residualDimensions[i] = currentResidualDimensions;
+			}
 		}
 	}
 	if(foundError) throw std::runtime_error("Error in RUVIIIC, check output");
-	return results;
+	if(withW)
+	{
+		Rcpp::List returnValue;
+		Rcpp::List WValues_R;
+		for(int i = 0; i < nCorrections; i++)
+		{
+			if(WValues[i].rows() > 0)
+			{
+				WValues_R(toCorrectNames[i]) = WValues[i];
+			}
+		}
+		returnValue["W"] = WValues_R;
+		returnValue["newY"] = results;
+		Rcpp::IntegerVector wrappedResidualDimensions = Rcpp::wrap(residualDimensions);
+		wrappedResidualDimensions.names() = Rcpp::wrap(toCorrectNames);
+		returnValue["residualDimensions"] = wrappedResidualDimensions;
+		return returnValue;
+	}
+	else return results;
 }

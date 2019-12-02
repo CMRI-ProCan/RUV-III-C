@@ -65,7 +65,7 @@ RUVIII_C_Varying_R <- function(k, ruvInputData, M, toCorrect, filename, potentia
 	results <- list()
 	results$peptideResults <- results$alphaResults <- results$W <- list()
 
-	results$residualDimensions <- vector(mode = "integer", length = "toCorrect")
+	results$residualDimensions <- vector(mode = "integer", length = length(toCorrect))
 	names(results$residualDimensions) <- toCorrect
 	results$residualDimensions[] <- -1
 

@@ -150,7 +150,6 @@ Rcpp::RObject RUVIIIC_Varying(Rcpp::NumericMatrix input, int k, Rcpp::NumericMat
 			if(std::min(currentResidualDimensions, static_cast<int>(controlIndicesThisVariable.size())) < k)
 			{
 				resultsAsEigen.col(i) = Eigen::VectorXd::Constant(nRows, std::numeric_limits<double>::quiet_NaN());
-				continue;
 			}
 			//In the special case that we're trying to remove the maximum possible number of factors, we can use the GLS formulation. 
 			else if (currentResidualDimensions == k)

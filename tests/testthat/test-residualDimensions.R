@@ -20,14 +20,14 @@ test_that("Test residual dimensions",
 				copiedData[1:2, 2] <- NA
 				copiedData[1:3, 3] <- NA
 				copiedData[1:19, 4] <- NA
-				result <- RUVIII_C(ruvInputData = copiedData, k = k, M = M, toCorrect = as.character(1:5), controls = as.character(15:20), withW = TRUE, filename = NULL, version = version)
+				result <- RUVIII_C(Y = copiedData, k = k, M = M, toCorrect = as.character(1:5), controls = as.character(15:20), withExtra = TRUE, filename = NULL, version = version)
 				expect_identical(unname(result$residualDimensions["1"]), 9L)
 				expect_identical(unname(result$residualDimensions["2"]), 9L)
 				expect_identical(unname(result$residualDimensions["3"]), 8L)
 				expect_identical(unname(result$residualDimensions["4"]), 0L)
 				expect_identical(unname(result$residualDimensions["5"]), 10L)
 
-				result <- RUVIII_C_Varying(ruvInputData = copiedData, k = k, M = M, toCorrect = as.character(1:5), potentialControls = as.character(15:20), withW = TRUE, filename = NULL, version = version)
+				result <- RUVIII_C_Varying(Y = copiedData, k = k, M = M, toCorrect = as.character(1:5), potentialControls = as.character(15:20), withExtra = TRUE, filename = NULL, version = version)
 				expect_identical(unname(result$residualDimensions["1"]), 9L)
 				expect_identical(unname(result$residualDimensions["2"]), 9L)
 				expect_identical(unname(result$residualDimensions["3"]), 8L)

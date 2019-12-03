@@ -14,22 +14,23 @@
 #' @param toCorrect The names of the variables to correct using RUV-III-C
 #' @param filename The intermediate file in which to save the results. 
 #' @param potentialControls The names of the control variables which are known to be constant across the observations
-#' @param withExtra Should we keep the estimate of the unwanted variation factors W, for each variable which is corrected?
+#' @param withExtra Should we generate extra information?
+#' @param withW Should we generate the matrices W giving information about the unwanted factors, for every peptide?
 #' @param batchSize How often should we write to the intermediate file? The default of 1000 implies that results are written to file every 1000 variables. 
 #' @param version The version of the underlying code to use. Must be either "CPP" or "R"
 #'
 #' @return If withExtra = FALSE, returns a matrix. If withExtra = TRUE, returns a list with entries named \code{newY}, \code{residualDimensions} and \code{W}.
 #'
 #' @export
-RUVIII_C_Varying <- function(k, Y, M, toCorrect, filename, potentialControls, withExtra = FALSE, batchSize = 1000, version = "CPP")
+RUVIII_C_Varying <- function(k, Y, M, toCorrect, filename, potentialControls, withExtra = FALSE, withW = FALSE, batchSize = 1000, version = "CPP")
 {
 	if(version == "CPP")
 	{
-		return(RUVIII_C_Varying_CPP(k = k, Y = Y, M = M, toCorrect = toCorrect, potentialControls = potentialControls, withExtra = withExtra))
+		return(RUVIII_C_Varying_CPP(k = k, Y = Y, M = M, toCorrect = toCorrect, potentialControls = potentialControls, withExtra = withExtra, withW = withW))
 	}
 	else if(version == "R")
 	{
-		return(RUVIII_C_Varying_R(k = k, Y = Y, M = M, toCorrect = toCorrect, filename = filename, potentialControls = potentialControls, withExtra = withExtra, batchSize = batchSize))
+		return(RUVIII_C_Varying_R(k = k, Y = Y, M = M, toCorrect = toCorrect, filename = filename, potentialControls = potentialControls, withExtra = withExtra, withW = withW, batchSize = batchSize))
 	}
 	else
 	{
@@ -107,19 +108,10 @@ RUVIII_C_Varying_R <- function(k, Y, M, toCorrect, filename, potentialControls, 
 					residualDimensions <- m - ncol(Msubset)
 					results$residualDimensions[peptide] <- residualDimensions
 					#You need at least two observations, across two different biological samples, in ordor to make any kind of correction
-					if(ncol(Msubset) < 2 || nrow(Msubset) < 2) 
+					#Aso, if the dimensions don't work, we can't correct this variable
+					if(ncol(Msubset) < 2 || nrow(Msubset) < 2 || min(residualDimensions, length(controlsThisPeptide)) < k) 
 					{
 						#Mark this peptide as uncorrected / uncorrectable.
-						newComputation <- TRUE
-						results$alphaResults[peptide] <- list(c())
-						results$peptideResults[[peptide]] <- rep(as.numeric(NA), nrow(Y))
-						names(results$peptideResults[[peptide]]) <- rownames(YWithoutNA)
-						if(withExtra) results$W[peptide] <- list(c())
-						next
-					}
-					#If the dimensions don't work, we can't correct this variable
-					if(min(residualDimensions, length(controlsThisPeptide)) < k)
-					{
 						newComputation <- TRUE
 						results$alphaResults[peptide] <- list(c())
 						results$peptideResults[[peptide]] <- rep(as.numeric(NA), nrow(Y))
@@ -145,7 +137,7 @@ RUVIII_C_Varying_R <- function(k, Y, M, toCorrect, filename, potentialControls, 
 						names(adjusted) <- rownames(YWithoutNA)
 						results$peptideResults[[peptide]] <- adjusted
 						results$alphaResults[[peptide]] <- t(Uk) %*% submatrix
-						if(withExtra)
+						if(withW)
 						{
 							results$W[[peptide]] <- matrix(nrow = nrow(YWithoutNA), ncol = k)
 							results$W[[peptide]][indices, ] <- productControls %*% Uk %*% solve(t(Uk) %*% productControls %*% Uk)
@@ -171,7 +163,7 @@ RUVIII_C_Varying_R <- function(k, Y, M, toCorrect, filename, potentialControls, 
 
 							results$alphaResults[[peptide]] <- currentResult
 							results$peptideResults[[peptide]] <- adjusted
-							if(withExtra)
+							if(withW)
 							{
 								results$W[[peptide]] <- rep(as.numeric(NA), nrow(YWithoutNA))
 								results$W[[peptide]][indices] <- currentPeptideW
@@ -211,7 +203,9 @@ RUVIII_C_Varying_R <- function(k, Y, M, toCorrect, filename, potentialControls, 
 	}
 	if(withExtra)
 	{
-		return(list(newY = do.call(cbind, results$peptideResults), W = results$W, alpha = results$alpha, residualDimensions = results$residualDimensions))
+		finalResult <- list(newY = do.call(cbind, results$peptideResults), alpha = results$alphaResults, residualDimensions = results$residualDimensions)
+		if(withW) finalResult$W <- results$W
+		return(finalResult)
 	}
 	else
 	{

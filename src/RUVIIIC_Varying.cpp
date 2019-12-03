@@ -10,14 +10,15 @@
 /// @param M The replicate matrix
 /// @param controls The names of the negative control variables
 /// @param toCorrect The names of the variables to correct
-/// @param withExtra Should we return the values of the W matrices for every corrected variable? Currently not implemented.
+/// @param withExtra Should we generate extra information?
+/// @param withW Should we generate the matrices W giving information about the unwanted factors, for every peptide?
 /// 
 /// @details Written with reference to the R function RUVIIIC::RUVIII_C_Varying, which is itself based on ruv::RUVIII. See the following papers for further detail on the algorithm and parameters:
 /// 	Molania, R., Gagnon-Bartsch, J. A., Dobrovic, A., and Speed, T. P. (2019). A new normalization for Nanostring nCounter gene expression data. Nucleic Acids Research, 47(12), 6073–6083.
 ///	Gagnon-Bartsch, J. A. and Speed, T. P. (2012). Using control genes to correct for unwanted variation in microarray data. Biostatistics, 13(3), 539–552.
 ///	Gagnon-Bartsch, J. A., Jacob, L., and Speed, T. P. (2013). Removing unwanted variation from high dimensional data with negative controls.
 // [[Rcpp::export]]
-Rcpp::RObject RUVIIIC_Varying(Rcpp::NumericMatrix input, int k, Rcpp::NumericMatrix M, Rcpp::CharacterVector controls, Rcpp::CharacterVector toCorrect, bool withExtra)
+Rcpp::RObject RUVIIIC_Varying(Rcpp::NumericMatrix input, int k, Rcpp::NumericMatrix M, Rcpp::CharacterVector controls, Rcpp::CharacterVector toCorrect, bool withExtra, bool withW)
 {
 	//Result matrix
 	Rcpp::NumericMatrix results(input.nrow(), toCorrect.size());
@@ -246,7 +247,7 @@ Rcpp::RObject RUVIIIC_Varying(Rcpp::NumericMatrix input, int k, Rcpp::NumericMat
 								correctedCounter++;
 							}
 						}
-						if(withExtra)
+						if(withW)
 						{
 							WValues[i].swap(currentPeptideW);
 						}
@@ -264,7 +265,7 @@ Rcpp::RObject RUVIIIC_Varying(Rcpp::NumericMatrix input, int k, Rcpp::NumericMat
 					}
 				}
 			}
-			if(withExtra)
+			if(withW)
 			{
 				residualDimensions[i] = currentResidualDimensions;
 			}
@@ -274,15 +275,18 @@ Rcpp::RObject RUVIIIC_Varying(Rcpp::NumericMatrix input, int k, Rcpp::NumericMat
 	if(withExtra)
 	{
 		Rcpp::List returnValue;
-		Rcpp::List WValues_R;
-		for(int i = 0; i < nCorrections; i++)
+		if(withW)
 		{
-			if(WValues[i].rows() > 0)
+			Rcpp::List WValues_R;
+			for(int i = 0; i < nCorrections; i++)
 			{
-				WValues_R(toCorrectNames[i]) = WValues[i];
+				if(WValues[i].rows() > 0)
+				{
+					WValues_R(toCorrectNames[i]) = WValues[i];
+				}
 			}
+			returnValue["W"] = WValues_R;
 		}
-		returnValue["W"] = WValues_R;
 		returnValue["newY"] = results;
 		Rcpp::IntegerVector wrappedResidualDimensions = Rcpp::wrap(residualDimensions);
 		wrappedResidualDimensions.names() = Rcpp::wrap(toCorrectNames);

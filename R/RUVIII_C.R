@@ -20,7 +20,8 @@
 #' @param toCorrect The names of the variables to correct using RUV-III-C
 #' @param filename The intermediate file in which to save the results, in the R version. Set to NULL to not use an intermediate file. The C++ version never saves an intermediate file. 
 #' @param controls The names of the control variables which are known to be constant across the observations
-#' @param withExtra Should we keep the estimate of the unwanted variation factors W, for each variable which is corrected?
+#' @param withExtra Should we generate extra information?
+#' @param withW Should we generate the matrices W giving information about the unwanted factors, for every peptide?
 #' @param batchSize How often should we write to the intermediate file? The default of 1000 implies that results are written to file every 1000 variables. 
 #' @param version The version of the underlying code to use. Must be either "CPP" or "R"
 #'
@@ -45,22 +46,22 @@
 #' #Actually run correction
 #' \dontrun{results <- RUVIII_C_R(k = 11, Y = onlyPeptideData, M = M, toCorrect = c(sisPeptides, actualControls), controls = actualControls, filename = "results.RData")}
 #' @export
-RUVIII_C <- function(k, Y, M, toCorrect, filename, controls, withExtra = FALSE, batchSize = 1000, version = "CPP")
+RUVIII_C <- function(k, Y, M, toCorrect, filename, controls, withExtra = FALSE, withW = FALSE, batchSize = 1000, version = "CPP")
 {
 	if(version == "CPP")
 	{
-		return(RUVIII_C_CPP(k = k, Y = Y, M = M, toCorrect = toCorrect, controls = controls, withExtra = withExtra))
+		return(RUVIII_C_CPP(k = k, Y = Y, M = M, toCorrect = toCorrect, controls = controls, withExtra = withExtra, withW = withW))
 	}
 	else if(version == "R")
 	{
-		return(RUVIII_C_R(k = k, Y = Y, M = M, toCorrect = toCorrect, filename = filename, controls = controls, withExtra = withExtra, batchSize = batchSize))
+		return(RUVIII_C_R(k = k, Y = Y, M = M, toCorrect = toCorrect, filename = filename, controls = controls, withExtra = withExtra, withW = withW, batchSize = batchSize))
 	}
 	else
 	{
 		stop("version must be either 'CPP' or 'R'")
 	}
 }
-RUVIII_C_R <- function(k, Y, M, toCorrect, filename, controls, withExtra = FALSE, batchSize = 1000)
+RUVIII_C_R <- function(k, Y, M, toCorrect, filename, controls, withExtra = FALSE, withW = FALSE, batchSize = 1000)
 {
 	if(missing(filename))
 	{
@@ -140,26 +141,15 @@ RUVIII_C_R <- function(k, Y, M, toCorrect, filename, controls, withExtra = FALSE
 					residualDimensions <- m - ncol(Msubset)
 					results$residualDimensions[peptide] <- residualDimensions
 					#You need at least two observations, across two different biological samples, in ordor to make any kind of correction
-					if(ncol(Msubset) < 2 || nrow(Msubset) < 2) 
+					#Also, if the dimensions don't work, we can't correct this variable
+					if(ncol(Msubset) < 2 || nrow(Msubset) < 2 || min(residualDimensions, length(controls)) < k) 
 					{
 						#Mark this peptide as uncorrected / uncorrectable.
 						newComputation <- TRUE
 						results$alphaResults[peptide] <- list(c())
 						results$peptideResults[[peptide]] <- rep(as.numeric(NA), nrow(Y))
 						names(results$peptideResults[[peptide]]) <- rownames(YWithoutNA)
-						if(withExtra) results$W[peptide] <- list(c())
-						next
-					}
-					#If the dimensions don't work, we can't correct this variable
-					if(min(residualDimensions, length(controls)) < k)
-					{
-						newComputation <- TRUE
-						if(withExtra)
-						{
-							results$alphaResults[peptide] <- list(c())
-							results$peptideResults[peptide] <- list(c())
-							results$W[peptide] <- list(c())
-						}
+						results$W[peptide] <- list(c())
 						next
 					}
 					#In the special case that we're trying to remove the maximum possible number of factors from this peptide, the eigen decomposition seems like it can be unstable. Fortunately, there is also the simpler GLS formulation, which may avoid those problems. 
@@ -180,7 +170,7 @@ RUVIII_C_R <- function(k, Y, M, toCorrect, filename, controls, withExtra = FALSE
 						names(adjusted) <- rownames(YWithoutNA)
 						results$peptideResults[[peptide]] <- adjusted
 						results$alphaResults[[peptide]] <- t(Uk) %*% submatrix
-						if(withExtra)
+						if(withW)
 						{
 							results$W[[peptide]] <- matrix(nrow = nrow(YWithoutNA), ncol = k)
 							results$W[[peptide]][indices, ] <- productControls %*% Uk %*% solve(t(Uk) %*% productControls %*% Uk)
@@ -206,7 +196,7 @@ RUVIII_C_R <- function(k, Y, M, toCorrect, filename, controls, withExtra = FALSE
 
 							results$alphaResults[[peptide]] <- currentResult
 							results$peptideResults[[peptide]] <- adjusted
-							if(withExtra)
+							if(withW)
 							{
 								results$W[[peptide]] <- rep(as.numeric(NA), nrow(YWithoutNA))
 								results$W[[peptide]][indices] <- currentPeptideW
@@ -246,7 +236,9 @@ RUVIII_C_R <- function(k, Y, M, toCorrect, filename, controls, withExtra = FALSE
 	}
 	if(withExtra)
 	{
-		return(list(newY = do.call(cbind, results$peptideResults), W = results$W, alpha = results$alphaResults, residualDimensions = results$residualDimensions))
+		finalResult <- list(newY = do.call(cbind, results$peptideResults), alpha = results$alphaResults, residualDimensions = results$residualDimensions)
+		if(withW) finalResult$W <- results$W
+		return(finalResult)
 	}
 	else
 	{

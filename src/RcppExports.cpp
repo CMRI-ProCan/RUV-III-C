@@ -7,7 +7,7 @@
 using namespace Rcpp;
 
 // RUVIIIC
-Rcpp::RObject RUVIIIC(Rcpp::NumericMatrix input, int k, Rcpp::NumericMatrix M, Rcpp::CharacterVector controls, Rcpp::CharacterVector toCorrect, bool withExtra);
+Rcpp::RObject RUVIIIC(Rcpp::NumericMatrix input, int k, Rcpp::NumericMatrix M, Rcpp::CharacterVector controls, Rcpp::CharacterVector toCorrect, bool withExtra, bool withW);
 RcppExport SEXP _RUVIIIC_RUVIIIC(SEXP inputSEXP, SEXP kSEXP, SEXP MSEXP, SEXP controlsSEXP, SEXP toCorrectSEXP, SEXP withExtraSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -23,7 +23,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // RUVIIIC_Varying
-Rcpp::RObject RUVIIIC_Varying(Rcpp::NumericMatrix input, int k, Rcpp::NumericMatrix M, Rcpp::CharacterVector controls, Rcpp::CharacterVector toCorrect, bool withExtra);
+Rcpp::RObject RUVIIIC_Varying(Rcpp::NumericMatrix input, int k, Rcpp::NumericMatrix M, Rcpp::CharacterVector controls, Rcpp::CharacterVector toCorrect, bool withExtra, bool withW);
 RcppExport SEXP _RUVIIIC_RUVIIIC_Varying(SEXP inputSEXP, SEXP kSEXP, SEXP MSEXP, SEXP controlsSEXP, SEXP toCorrectSEXP, SEXP withExtraSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -40,8 +40,8 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_RUVIIIC_RUVIIIC", (DL_FUNC) &_RUVIIIC_RUVIIIC, 6},
-    {"_RUVIIIC_RUVIIIC_Varying", (DL_FUNC) &_RUVIIIC_RUVIIIC_Varying, 6},
+    {"_RUVIIIC_RUVIIIC", (DL_FUNC) &_RUVIIIC_RUVIIIC, 7},
+    {"_RUVIIIC_RUVIIIC_Varying", (DL_FUNC) &_RUVIIIC_RUVIIIC_Varying, 7},
     {NULL, NULL, 0}
 };
 

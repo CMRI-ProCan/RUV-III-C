@@ -22,22 +22,22 @@
 #' @return If withExtra = FALSE, returns a matrix. If withExtra = TRUE, returns a list with entries named \code{newY}, \code{residualDimensions} and \code{W}.
 #'
 #' @export
-RUVIII_C_Varying <- function(k, Y, M, toCorrect, filename, potentialControls, withExtra = FALSE, withW = FALSE, batchSize = 1000, version = "CPP")
+RUVIII_C_Varying <- function(k, Y, M, toCorrect, filename, potentialControls, withExtra = FALSE, withW = FALSE, withAlpha = TRUE, batchSize = 1000, version = "CPP")
 {
 	if(version == "CPP")
 	{
-		return(RUVIII_C_Varying_CPP(k = k, Y = Y, M = M, toCorrect = toCorrect, potentialControls = potentialControls, withExtra = withExtra, withW = withW))
+		return(RUVIII_C_Varying_CPP(k = k, Y = Y, M = M, toCorrect = toCorrect, potentialControls = potentialControls, withExtra = withExtra, withW = withW, withAlpha = withAlpha))
 	}
 	else if(version == "R")
 	{
-		return(RUVIII_C_Varying_R(k = k, Y = Y, M = M, toCorrect = toCorrect, filename = filename, potentialControls = potentialControls, withExtra = withExtra, withW = withW, batchSize = batchSize))
+		return(RUVIII_C_Varying_R(k = k, Y = Y, M = M, toCorrect = toCorrect, filename = filename, potentialControls = potentialControls, withExtra = withExtra, withW = withW, withAlpha = withAlpha, batchSize = batchSize))
 	}
 	else
 	{
 		stop("version must be either 'CPP' or 'R'")
 	}
 }
-RUVIII_C_Varying_R <- function(k, Y, M, toCorrect, filename, potentialControls, withExtra = FALSE, batchSize = 1000)
+RUVIII_C_Varying_R <- function(k, Y, M, toCorrect, filename, potentialControls, withExtra = FALSE, withW = FALSE, withAlpha = FALSE, batchSize = 1000)
 {
 	if(missing(filename))
 	{
@@ -136,7 +136,7 @@ RUVIII_C_Varying_R <- function(k, Y, M, toCorrect, filename, potentialControls, 
 						adjusted[indices] <- Msubset %*% solve(t(Msubset) %*% invMatrix %*% Msubset) %*% t(Msubset) %*% invMatrix %*% submatrix[, peptide]
 						names(adjusted) <- rownames(YWithoutNA)
 						results$peptideResults[[peptide]] <- adjusted
-						results$alphaResults[[peptide]] <- t(Uk) %*% submatrix
+						if(withAlpha) results$alphaResults[[peptide]] <- t(Uk) %*% submatrix
 						if(withW)
 						{
 							results$W[[peptide]] <- matrix(nrow = nrow(YWithoutNA), ncol = k)
@@ -161,8 +161,8 @@ RUVIII_C_Varying_R <- function(k, Y, M, toCorrect, filename, potentialControls, 
 							adjusted[indices] <- submatrix[,peptide, drop=F] - currentPeptideW %*% cbind(currentResult)
 							names(adjusted) <- rownames(YWithoutNA)
 
-							results$alphaResults[[peptide]] <- currentResult
 							results$peptideResults[[peptide]] <- adjusted
+							if(withAlpha) results$alphaResults[[peptide]] <- currentResult
 							if(withW)
 							{
 								results$W[[peptide]] <- rep(as.numeric(NA), nrow(YWithoutNA))

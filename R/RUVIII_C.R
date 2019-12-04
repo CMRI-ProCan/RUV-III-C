@@ -46,22 +46,22 @@
 #' #Actually run correction
 #' \dontrun{results <- RUVIII_C_R(k = 11, Y = onlyPeptideData, M = M, toCorrect = c(sisPeptides, actualControls), controls = actualControls, filename = "results.RData")}
 #' @export
-RUVIII_C <- function(k, Y, M, toCorrect, filename, controls, withExtra = FALSE, withW = FALSE, batchSize = 1000, version = "CPP")
+RUVIII_C <- function(k, Y, M, toCorrect, filename, controls, withExtra = FALSE, withW = FALSE, withAlpha = FALSE, batchSize = 1000, version = "CPP")
 {
 	if(version == "CPP")
 	{
-		return(RUVIII_C_CPP(k = k, Y = Y, M = M, toCorrect = toCorrect, controls = controls, withExtra = withExtra, withW = withW))
+		return(RUVIII_C_CPP(k = k, Y = Y, M = M, toCorrect = toCorrect, controls = controls, withExtra = withExtra, withW = withW, withAlpha = withAlpha))
 	}
 	else if(version == "R")
 	{
-		return(RUVIII_C_R(k = k, Y = Y, M = M, toCorrect = toCorrect, filename = filename, controls = controls, withExtra = withExtra, withW = withW, batchSize = batchSize))
+		return(RUVIII_C_R(k = k, Y = Y, M = M, toCorrect = toCorrect, filename = filename, controls = controls, withExtra = withExtra, withW = withW, withAlpha = withAlpha, batchSize = batchSize))
 	}
 	else
 	{
 		stop("version must be either 'CPP' or 'R'")
 	}
 }
-RUVIII_C_R <- function(k, Y, M, toCorrect, filename, controls, withExtra = FALSE, withW = FALSE, batchSize = 1000)
+RUVIII_C_R <- function(k, Y, M, toCorrect, filename, controls, withExtra = FALSE, withW = FALSE, withAlpha = FALSE, batchSize = 1000)
 {
 	if(missing(filename))
 	{
@@ -169,7 +169,7 @@ RUVIII_C_R <- function(k, Y, M, toCorrect, filename, controls, withExtra = FALSE
 						adjusted[indices] <- Msubset %*% solve(t(Msubset) %*% invMatrix %*% Msubset) %*% t(Msubset) %*% invMatrix %*% submatrix[, peptide]
 						names(adjusted) <- rownames(YWithoutNA)
 						results$peptideResults[[peptide]] <- adjusted
-						results$alphaResults[[peptide]] <- t(Uk) %*% submatrix
+						if(withAlpha) results$alphaResults[[peptide]] <- t(Uk) %*% submatrix
 						if(withW)
 						{
 							results$W[[peptide]] <- matrix(nrow = nrow(YWithoutNA), ncol = k)
@@ -194,8 +194,8 @@ RUVIII_C_R <- function(k, Y, M, toCorrect, filename, controls, withExtra = FALSE
 							adjusted[indices] <- submatrix[,peptide, drop=F] - currentPeptideW %*% cbind(currentResult)
 							names(adjusted) <- rownames(YWithoutNA)
 
-							results$alphaResults[[peptide]] <- currentResult
 							results$peptideResults[[peptide]] <- adjusted
+							if(withAlpha) results$alphaResults[[peptide]] <- currentResult
 							if(withW)
 							{
 								results$W[[peptide]] <- rep(as.numeric(NA), nrow(YWithoutNA))
@@ -236,8 +236,9 @@ RUVIII_C_R <- function(k, Y, M, toCorrect, filename, controls, withExtra = FALSE
 	}
 	if(withExtra)
 	{
-		finalResult <- list(newY = do.call(cbind, results$peptideResults), alpha = results$alphaResults, residualDimensions = results$residualDimensions)
+		finalResult <- list(newY = do.call(cbind, results$peptideResults), residualDimensions = results$residualDimensions)
 		if(withW) finalResult$W <- results$W
+		if(withAlpha) finalResult$alpha <- results$alphaResults
 		return(finalResult)
 	}
 	else

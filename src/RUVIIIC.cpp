@@ -2,6 +2,7 @@
 #include "RcppEigen.h"
 #include <limits>
 #include <SymEigs.h>
+#include <Eigen/SVD>
 
 /// @brief Apply RUV-III-C
 ///
@@ -18,7 +19,7 @@
 ///	Gagnon-Bartsch, J. A. and Speed, T. P. (2012). Using control genes to correct for unwanted variation in microarray data. Biostatistics, 13(3), 539–552.
 ///	Gagnon-Bartsch, J. A., Jacob, L., and Speed, T. P. (2013). Removing unwanted variation from high dimensional data with negative controls.
 // [[Rcpp::export]]
-Rcpp::RObject RUVIIIC(Rcpp::NumericMatrix input, int k, Rcpp::NumericMatrix M, Rcpp::CharacterVector controls, Rcpp::CharacterVector toCorrect, bool withExtra, bool withW)
+Rcpp::RObject RUVIIIC(Rcpp::NumericMatrix input, int k, Rcpp::NumericMatrix M, Rcpp::CharacterVector controls, Rcpp::CharacterVector toCorrect, bool withExtra, bool withW, bool withAlpha)
 {
 	//Result matrix
 	Rcpp::NumericMatrix results(input.nrow(), toCorrect.size());
@@ -36,6 +37,8 @@ Rcpp::RObject RUVIIIC(Rcpp::NumericMatrix input, int k, Rcpp::NumericMatrix M, R
 
 	//Vector of W results, if required.
 	std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::ColMajor> > WValues(nCorrections);
+	//Vector of alpha results. 
+	std::vector<Eigen::MatrixXd> alphaValues(nCorrections);
 	std::vector<int> residualDimensions(nCorrections, -1);
 
 	std::vector<std::string> controlNames = Rcpp::as<std::vector<std::string> >(controls);
@@ -162,6 +165,35 @@ Rcpp::RObject RUVIIIC(Rcpp::NumericMatrix input, int k, Rcpp::NumericMatrix M, R
 						correctedCounter++;
 					}
 				}
+				//Now compute alpha and W
+				if(withExtra)
+				{
+					Eigen::MatrixXd orthogonalProjection = Eigen::MatrixXd::Identity(nSubmatrixRows, nSubmatrixRows) - submatrixMReducedColumnsView * (submatrixMReducedColumnsView.transpose() * submatrixMReducedColumnsView).inverse() * submatrixMReducedColumnsView.transpose();
+					Eigen::BDCSVD<Eigen::MatrixXd> decomposed = Eigen::BDCSVD<Eigen::MatrixXd>(orthogonalProjection, Eigen::ComputeThinV | Eigen::ComputeThinU);
+					//get out the eigenvectors
+					Eigen::MatrixXd eigenVectors = decomposed.matrixU().block(0, 0, decomposed.rows(), k);
+					//Get out alpha - effects on all the variables
+					if(withAlpha) alphaValues[i] = eigenVectors.transpose() * submatrixDataView;
+					//Do we want to compute and return W?
+					if(withW)
+					{
+						Eigen::MatrixXd currentPeptideW = productControls * eigenVectors * (eigenVectors.transpose() * productControls * eigenVectors).inverse();
+						int correctedCounter = 0;
+						WValues[i].resize(nRows, k);
+						for(int row = 0; row < nRows; row++)
+						{
+							if(!std::isnan(input(row, columnIndexWithinInput)))
+							{
+								WValues[i].row(row) = currentPeptideW.row(correctedCounter);
+								correctedCounter++;
+							}
+							else 
+							{
+								WValues[i].row(row) = Eigen::VectorXd::Constant(k, std::numeric_limits<double>::quiet_NaN());
+							}
+						}
+					}
+				}
 			}
 			else
 			{
@@ -214,24 +246,24 @@ Rcpp::RObject RUVIIIC(Rcpp::NumericMatrix input, int k, Rcpp::NumericMatrix M, R
 							submatrixDataControlsView.col(controlCounter) = submatrixDataView.col(controlIndices[controlCounter]);
 						}
 						Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::ColMajor> currentPeptideW = submatrixDataControlsView * acView.transpose() * (acView * acView.transpose()).inverse();
+						if(withAlpha) alphaValues[i] = alpha;
 						auto corrected = submatrixDataView.col(columnIndexWithinInput) - currentPeptideW * alpha.col(columnIndexWithinInput);
 						//Now store the results. We're putting the results back into the correct places in the results matrix.
 						int correctedCounter = 0;
+						if(withW) WValues[i].resize(nRows, k);
 						for(int row = 0; row < nRows; row++)
 						{
 							if(std::isnan(input(row, columnIndexWithinInput)))
 							{
 								resultsAsEigen(row, i) = std::numeric_limits<double>::quiet_NaN();
+								WValues[i].row(row) = Eigen::VectorXd::Constant(k, std::numeric_limits<double>::quiet_NaN());
 							}
 							else 
 							{
 								resultsAsEigen(row, i) = corrected(correctedCounter);
+								if(withW) WValues[i].row(row) = currentPeptideW.row(correctedCounter);
 								correctedCounter++;
 							}
-						}
-						if(withW)
-						{
-							WValues[i].swap(currentPeptideW);
 						}
 					}
 				}
@@ -265,9 +297,23 @@ Rcpp::RObject RUVIIIC(Rcpp::NumericMatrix input, int k, Rcpp::NumericMatrix M, R
 				if(WValues[i].rows() > 0)
 				{
 					WValues_R(toCorrectNames[i]) = WValues[i];
+					Rcpp::rownames(WValues_R(toCorrectNames[i])) = Rcpp::rownames(input);
 				}
 			}
 			returnValue["W"] = WValues_R;
+		}
+		if(withAlpha)
+		{
+			Rcpp::List alphaValues_R;
+			for(int i = 0; i < nCorrections; i++)
+			{
+				if(alphaValues[i].rows() > 0)
+				{
+					alphaValues_R(toCorrectNames[i]) = alphaValues[i];
+					Rcpp::colnames(alphaValues_R(toCorrectNames[i])) = Rcpp::colnames(input);
+				}
+			}
+			returnValue["alpha"] = alphaValues_R;
 		}
 		returnValue["newY"] = results;
 		Rcpp::IntegerVector wrappedResidualDimensions = Rcpp::wrap(residualDimensions);

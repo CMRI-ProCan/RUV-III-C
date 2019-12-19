@@ -22,7 +22,7 @@
 #' @return If withExtra = FALSE, returns a matrix. If withExtra = TRUE, returns a list with entries named \code{newY}, \code{residualDimensions} and \code{W}.
 #'
 #' @export
-RUVIII_C_Varying <- function(k, Y, M, toCorrect, filename, potentialControls, withExtra = FALSE, withW = FALSE, withAlpha = TRUE, batchSize = 1000, version = "CPP")
+RUVIII_C_Varying <- function(k, Y, M, toCorrect, filename, potentialControls, withExtra = FALSE, withW = FALSE, withAlpha = FALSE, batchSize = 1000, version = "CPP")
 {
 	if(version == "CPP")
 	{

@@ -18,6 +18,7 @@
 #' @param withW Should we generate the matrices W giving information about the unwanted factors, for every peptide?
 #' @param batchSize How often should we write to the intermediate file? The default of 1000 implies that results are written to file every 1000 variables. 
 #' @param version The version of the underlying code to use. Must be either "CPP" or "R"
+#' @param withAlpha Should we generate, per-peptide, the matrix alpha giving the effects of the unwanted factors?
 #'
 #' @return If withExtra = FALSE, returns a matrix. If withExtra = TRUE, returns a list with entries named \code{newY}, \code{residualDimensions} and \code{W}.
 #'

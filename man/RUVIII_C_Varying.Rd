@@ -25,6 +25,8 @@ RUVIII_C_Varying(k, Y, M, toCorrect, filename, potentialControls,
 
 \item{withW}{Should we generate the matrices W giving information about the unwanted factors, for every peptide?}
 
+\item{withAlpha}{Should we generate, per-peptide, the matrix alpha giving the effects of the unwanted factors?}
+
 \item{batchSize}{How often should we write to the intermediate file? The default of 1000 implies that results are written to file every 1000 variables.}
 
 \item{version}{The version of the underlying code to use. Must be either "CPP" or "R"}

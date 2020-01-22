@@ -21,6 +21,10 @@
 // [[Rcpp::export]]
 Rcpp::RObject RUVIIIC(Rcpp::NumericMatrix input, int k, Rcpp::NumericMatrix M, Rcpp::CharacterVector controls, Rcpp::CharacterVector toCorrect, bool withExtra, bool withW, bool withAlpha)
 {
+	if(input.nrow() != M.nrow())
+	{
+		throw std::runtime_error("The number of rows in Y and M must be identical");
+	}
 	//Result matrix
 	Rcpp::NumericMatrix results(input.nrow(), toCorrect.size());
 	Rcpp::colnames(results) = toCorrect;
@@ -69,8 +73,7 @@ Rcpp::RObject RUVIIIC(Rcpp::NumericMatrix input, int k, Rcpp::NumericMatrix M, R
 	Eigen::MatrixXd inputSymmetrised = inputAsRowMajorImputed * inputAsRowMajorImputed.transpose();
 
 	//Was there an error found during the program? We need a flag, because we can't throw exceptions from inside a parallel loop
-	bool foundError = false;
-	std::string error;
+	std::vector<std::string> errors;
 	#pragma omp parallel
 	{
 		//We copy the submatrix of the data matrix into here
@@ -94,8 +97,6 @@ Rcpp::RObject RUVIIIC(Rcpp::NumericMatrix input, int k, Rcpp::NumericMatrix M, R
 		#pragma omp for schedule(dynamic)
 		for(int i = 0; i < nCorrections; i++)
 		{
-			//If there's been an error somewhere, just NOP out the rest of the loop iterations
-			if (foundError) continue;
 			//The name of the column we are currently trying to correct
 			std::string currentToCorrect = toCorrectNames[i];
 			//The index of that column within the data matrix
@@ -222,11 +223,13 @@ Rcpp::RObject RUVIIIC(Rcpp::NumericMatrix input, int k, Rcpp::NumericMatrix M, R
 					{
 						#pragma omp critical
 						{
-							std::cout << "Not enough eigenvalues converged for variable " << currentToCorrect << ", this variable was not normalised." << std::endl;
-							for(int row = 0; row < nRows; row++)
-							{
-								resultsAsEigen(row, i) = std::numeric_limits<double>::quiet_NaN();
-							}
+							std::stringstream ss;
+							ss << "Not enough eigenvalues converged for variable " << currentToCorrect << ", this variable was not normalised."; 
+							errors.push_back(ss.str());
+						}
+						for(int row = 0; row < nRows; row++)
+						{
+							resultsAsEigen(row, i) = std::numeric_limits<double>::quiet_NaN();
 						}
 					}
 					else
@@ -271,11 +274,13 @@ Rcpp::RObject RUVIIIC(Rcpp::NumericMatrix input, int k, Rcpp::NumericMatrix M, R
 				{
 					#pragma omp critical
 					{
-						std::cout << "Error in eigen decomposition for variable " << currentToCorrect << ", this variable was not normalised." << std::endl;
-						for(int row = 0; row < nRows; row++)
-						{
-							resultsAsEigen(row, i) = std::numeric_limits<double>::quiet_NaN();
-						}
+						std::stringstream ss;
+						ss << "Error in eigen decomposition for variable " << currentToCorrect << ", this variable was not normalised.";
+						errors.push_back(ss.str());
+					}
+					for(int row = 0; row < nRows; row++)
+					{
+						resultsAsEigen(row, i) = std::numeric_limits<double>::quiet_NaN();
 					}
 				}
 			}
@@ -285,7 +290,13 @@ Rcpp::RObject RUVIIIC(Rcpp::NumericMatrix input, int k, Rcpp::NumericMatrix M, R
 			}
 		}
 	}
-	if(foundError) throw std::runtime_error("Error in RUVIIIC, check output");
+	if(errors.size() > 0)
+	{
+		for(std::string s : errors)
+		{
+			Rcpp::Rcout << s << std::endl;
+		}
+	}
 	if(withExtra)
 	{
 		Rcpp::List returnValue;

@@ -24,6 +24,18 @@
 #' @export
 RUVIII_C_Varying <- function(k, Y, M, toCorrect, filename, potentialControls, withExtra = FALSE, withW = FALSE, withAlpha = FALSE, batchSize = 1000, version = "CPP")
 {
+	if(nrow(M) != nrow(Y))
+	{
+		stop("The number of rows in Y and M must be identical")
+	}
+	if(length(potentialControls) != length(unique(potentialControls)))
+	{
+		stop("Controls were not unique")
+	}
+	if(!all(potentialControls %in% colnames(Y)))
+	{
+		stop("Not all potential controls were columns of Y")
+	}
 	if(version == "CPP")
 	{
 		return(RUVIII_C_Varying_CPP(k = k, Y = Y, M = M, toCorrect = toCorrect, potentialControls = potentialControls, withExtra = withExtra, withW = withW, withAlpha = withAlpha))
@@ -58,6 +70,18 @@ RUVIII_C_Varying_R <- function(k, Y, M, toCorrect, filename, potentialControls, 
 	if(k > length(potentialControls))
 	{
 		stop("Input k cannot be larger than the number of negative controls")
+	}
+	if(nrow(M) != nrow(Y))
+	{
+		stop("The number of rows in Y and M must be identical")
+	}
+	if(length(potentialControls) != length(unique(potentialControls)))
+	{
+		stop("Controls were not unique")
+	}
+	if(!all(potentialControls %in% colnames(Y)))
+	{
+		stop("Not all potential controls were columns of Y")
 	}
 	#Replace NAs with 0
 	YWithoutNA <- Y
@@ -211,4 +235,56 @@ RUVIII_C_Varying_R <- function(k, Y, M, toCorrect, filename, potentialControls, 
 	{
 		return(do.call(cbind, results$peptideResults))
 	}
+}
+#' @export
+RUVIII_C_Varying_residual_dimension <- function(k, Y, M, potentialControls)
+{
+	if(k <= 0)
+	{
+		stop("Input k, the number of factors of unwanted variation, must be positive")
+	}
+	if(is.null(rownames(Y)))
+	{
+		stop("Function RUVIII_NM_Varying requires row-names for input Y")
+	}
+	if(k >= nrow(Y))
+	{
+		stop("Input k cannot be larger than or equal to the number of rows in the input matrix")
+	}
+	if(k > length(potentialControls))
+	{
+		stop("Input k cannot be larger than the number of negative controls")
+	}
+	if(nrow(M) != nrow(Y))
+	{
+		stop("The number of rows in Y and M must be identical")
+	}
+
+	residualDimensions <- vector(mode = "integer", length = ncol(Y))
+	names(residualDimensions) <- colnames(Y)
+	residualDimensions[] <- -1L
+
+	for(peptideIndex in 1:ncol(Y))
+	{
+		peptide <- colnames(Y)[peptideIndex]
+		#row indices of the rows which have actual values
+		indices <- which(!is.na(Y[,peptide]))
+		#Find the controls which are non-missing, for those rows. 
+		controlsThisPeptide <- names(which(apply(Y[indices, potentialControls, drop = F], 2, function(x) sum(is.na(x)) == 0)))
+		#If there are no non-missing observations, then we can just mark this peptide as uncorrected / uncorrectable
+		if(length(indices) > 0)
+		{
+			#Create the matrix that select rows of the input data matrix
+			selectRows <- matrix(0, nrow = length(indices), ncol = nrow(Y))
+			selectRows[cbind(1:length(indices), indices)] <- 1
+			#Submatrix of the replicate matrix
+			Msubset <- M[indices, , drop = F]
+			#Some whole biological replicates are removed in the process. So remove those entire columns. This has consequences for the dimension tests later on. 
+			Msubset <- Msubset[, apply(Msubset, 2, function(x) sum(x) > 0), drop=F]
+			#Number of observations
+			m <- nrow(Msubset)
+			residualDimensions[peptide] <- m - ncol(Msubset)
+		}
+	}
+	return(residualDimensions)
 }

@@ -5,7 +5,8 @@
 \title{RUV-III-C}
 \usage{
 RUVIII_C(k, Y, M, toCorrect, filename, controls, withExtra = FALSE,
-  batchSize = 1000, version = "CPP")
+  withW = FALSE, withAlpha = FALSE, batchSize = 1000,
+  version = "CPP")
 }
 \arguments{
 \item{k}{The number of factors of unwanted variation to remove}
@@ -20,7 +21,9 @@ RUVIII_C(k, Y, M, toCorrect, filename, controls, withExtra = FALSE,
 
 \item{controls}{The names of the control variables which are known to be constant across the observations}
 
-\item{withExtra}{Should we keep the estimate of the unwanted variation factors W, for each variable which is corrected?}
+\item{withExtra}{Should we generate extra information?}
+
+\item{withW}{Should we generate the matrices W giving information about the unwanted factors, for every peptide?}
 
 \item{batchSize}{How often should we write to the intermediate file? The default of 1000 implies that results are written to file every 1000 variables.}
 

@@ -20,10 +20,11 @@
 #' @param toCorrect The names of the variables to correct using RUV-III-C
 #' @param filename The intermediate file in which to save the results, in the R version. Set to NULL to not use an intermediate file. The C++ version never saves an intermediate file. 
 #' @param controls The names of the control variables which are known to be constant across the observations
-#' @param withExtra Should we generate extra information?
+#' @param withExtra Should we generate extra information? 
 #' @param withW Should we generate the matrices W giving information about the unwanted factors, for every peptide?
 #' @param batchSize How often should we write to the intermediate file? The default of 1000 implies that results are written to file every 1000 variables. 
 #' @param version The version of the underlying code to use. Must be either "CPP" or "R"
+#' @param withAlpha Should we generate, per-peptide, the matrix alpha giving the effects of the unwanted factors?
 #'
 #' @return If withExtra = FALSE, returns a matrix. If withExtra = TRUE, returns a list with entries named \code{newY}, \code{residualDimensions} and \code{W}.
 #'
@@ -48,6 +49,18 @@
 #' @export
 RUVIII_C <- function(k, Y, M, toCorrect, filename, controls, withExtra = FALSE, withW = FALSE, withAlpha = FALSE, batchSize = 1000, version = "CPP")
 {
+	if(nrow(M) != nrow(Y))
+	{
+		stop("The number of rows in Y and M must be identical")
+	}
+	if(length(controls) != length(unique(controls)))
+	{
+		stop("Controls were not unique")
+	}
+	if(!all(controls %in% colnames(Y)))
+	{
+		stop("Not all controls were columns of Y")
+	}
 	if(version == "CPP")
 	{
 		return(RUVIII_C_CPP(k = k, Y = Y, M = M, toCorrect = toCorrect, controls = controls, withExtra = withExtra, withW = withW, withAlpha = withAlpha))
@@ -94,6 +107,18 @@ RUVIII_C_R <- function(k, Y, M, toCorrect, filename, controls, withExtra = FALSE
 	if(k > length(controls))
 	{
 		stop("Input k cannot be larger than the number of negative controls")
+	}
+	if(nrow(M) != nrow(Y))
+	{
+		stop("The number of rows in Y and M must be identical")
+	}
+	if(length(controls) != length(unique(controls)))
+	{
+		stop("Controls were not unique")
+	}
+	if(!all(controls %in% colnames(Y)))
+	{
+		stop("Not all controls were columns of Y")
 	}
 	#Replace NAs with 0
 	YWithoutNA <- Y

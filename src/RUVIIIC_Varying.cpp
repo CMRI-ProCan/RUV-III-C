@@ -217,7 +217,7 @@ Rcpp::RObject RUVIIIC_Varying(Rcpp::NumericMatrix input, int k, Rcpp::NumericMat
 				//Create the view which has the correct number of rows
 				auto selectRowsFromInputView = selectRowsFromInput.block(0, 0, nSubmatrixRows, nRows);
 				selectRowsFromInputView = Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>::Constant(nSubmatrixRows, nRows, 0);
-				for(int i = 0; i < nonMissingIndices.size(); i++)
+				for(int i = 0; i < static_cast<int>(nonMissingIndices.size()); i++)
 				{
 					selectRowsFromInputView(i, nonMissingIndices[i]) = 1;
 				}

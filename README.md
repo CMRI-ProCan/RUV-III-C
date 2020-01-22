@@ -17,7 +17,7 @@ Normalisation is an essential step in the analysis of any large omic dataset. So
 
 There is mimimum requirement to use the `RUV-III-C` package, but you must have sufficient RAM to run the analysis requested. Here ``sufficient'' means enough RAM to load the input data, and also enough for a working set per-thread. This means that memory scales linearly with the number of threads. If you run out of memory, consider lowering the number of threads used. The package will by default use as many threads as there are cores available, although the number of threads can be restricted. 
 
-Four CPU cores and 16GB RAM are very much more than is necesarry to run the provided example. 
+Four CPU cores and 16GB RAM are much more than is necesarry to run the provided example. 
 
 ## Software Requirements
 
@@ -30,7 +30,6 @@ Several dependency packages must be installed, and a minimum R version of 3.4.0 
 # Installation Guide
 
 ## Development Version
-
 
 ### Package Dependencies
 
@@ -48,7 +47,15 @@ require(devtools)
 install_github('CMRI-ProCan/RUVIIIC')
 ```
 
+The package should take less than a minute to install.
+
+# Instructions for use
+
+Run this software on your dataset using the same method outline in the following demo. 
+
 # Demo
+
+The following demo runs in a couple of minutes:
 
 ```
 data(crossLab)
@@ -67,5 +74,5 @@ potentialControlsAlwaysFound <- names(which(apply(onlyPeptideData[, potentialCon
 #Because there are so many potential controls here, we only use 500.
 actualControls <- head(potentialControlsAlwaysFound, 500)
 #Actually run correction
-results <- RUVIII_C_R(k = 11, Y = onlyPeptideData, M = M, toCorrect = c(sisPeptides, actualControls), controls = actualControls, filename = "results.RData")
+results <- RUVIII_C(k = 11, Y = onlyPeptideData, M = M, toCorrect = c(sisPeptides, actualControls), controls = actualControls, filename = "results.RData")
 ```

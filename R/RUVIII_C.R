@@ -45,7 +45,7 @@
 #' #Because there are so many potential controls here, we only use 500. 
 #' actualControls <- head(potentialControlsAlwaysFound, 500)
 #' #Actually run correction
-#' \dontrun{results <- RUVIII_C_R(k = 11, Y = onlyPeptideData, M = M, toCorrect = c(sisPeptides, actualControls), controls = actualControls, filename = "results.RData")}
+#' \dontrun{results <- RUVIII_C(k = 11, Y = onlyPeptideData, M = M, toCorrect = c(sisPeptides, actualControls), controls = actualControls, filename = "results.RData")}
 #' @export
 RUVIII_C <- function(k, Y, M, toCorrect, filename, controls, withExtra = FALSE, withW = FALSE, withAlpha = FALSE, batchSize = 1000, version = "CPP")
 {

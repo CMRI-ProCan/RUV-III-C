@@ -1,9 +1,9 @@
 #' @include RcppExports.R
-#' RUV-III-C, varying controls
+#' @title RUV-III-C, varying controls
 #'
-#' Apply RUV-III-C, a variation of RUV-III that only uses non-missing values
+#' @description Apply RUV-III-C, a variation of RUV-III that only uses non-missing values
 #' 
-#' See the documentation of \link{RUVIII_C} for more information about the RUV-III-C method. This function is identical, except in this case the set of negative control variables actually used varies depending on the target variable to be normalized. Instead of putting in a list of negative control variables, the user specifies a list of potential negatve control variables. 
+#' @details See the documentation of \link{RUVIII_C} for more information about the RUV-III-C method. This function is identical, except in this case the set of negative control variables actually used varies depending on the target variable to be normalized. Instead of putting in a list of negative control variables, the user specifies a list of potential negatve control variables. 
 #'
 #' When normalizing variable X, the algorithm begins by selecting the rows of the data matrix for which X is non-missing. Out of the potential negative control peptides, it selects those that are always non-missing across the selected subset. The standard version of RUV-III is then applied, similar to \link{RUVIII_C}. 
 #' 
@@ -238,24 +238,22 @@ RUVIII_C_Varying_R <- function(k, Y, M, toCorrect, filename, potentialControls, 
 		return(do.call(cbind, results$peptideResults))
 	}
 }
+#' @title Compute amount of replication, assuming varying controls
+#'
+#' @description Compute amount of replication, assuming varying controls
+#' 
+#' @details When applying RUV-III-C with varying controls, the amount of replication available for normalisation depends on the variable being normalised. The amount of replication is measured as the number of technical replicates in which a variable is measured (rows of the design matrix) minus the number of biological samples (columns of the design matrix) in which a variable is measured. This value is useful as a filtering criteria, because variables with a low amount of replication will be poorly normalised by the RUV family of methods. 
+#' @param Y The input data matrix. Must be a matrix, not a data.frame. It should contain missing (NA) values, rather than zeros. 
+#' @param M The design matrix containing information about technical replicates. It should not contain an intercept term!
+#' @param potentialControls The names of the control variables which are known to be constant across the observations
+#' @return A vector of integers, one per column of Y. 
+#'
 #' @export
-RUVIII_C_Varying_residual_dimension <- function(k, Y, M, potentialControls)
+RUVIII_C_Varying_residual_dimension <- function(Y, M, potentialControls)
 {
-	if(k <= 0)
-	{
-		stop("Input k, the number of factors of unwanted variation, must be positive")
-	}
 	if(is.null(rownames(Y)))
 	{
 		stop("Function RUVIII_NM_Varying requires row-names for input Y")
-	}
-	if(k >= nrow(Y))
-	{
-		stop("Input k cannot be larger than or equal to the number of rows in the input matrix")
-	}
-	if(k > length(potentialControls))
-	{
-		stop("Input k cannot be larger than the number of negative controls")
 	}
 	if(nrow(M) != nrow(Y))
 	{

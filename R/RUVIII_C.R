@@ -1,9 +1,9 @@
 #' @include RcppExports.R
-#' RUV-III-C
+#' @title RUV-III-C
 #'
-#' Apply RUV-III-C, a variation of RUV-III that only uses non-missing values
+#' @description Apply RUV-III-C, a variation of RUV-III that only uses non-missing values
 #' 
-#' RUV-III is a sophisticated method for removing unwanted variation. The key difficulty in removing unwanted variation is distinguishing wanted from unwanted variation. RUV-III solves this by relying on technical replication, and a list of variables (known as negative control variables) which are known a priori to be constant across all observations. Any variation in the negative control variables across the dataset is (by assumption) unwanted. So we can distinguish wanted from unwanted variation, and therefore estimate the unwanted variation and remove it. 
+#' @details RUV-III is a sophisticated method for removing unwanted variation. The key difficulty in removing unwanted variation is distinguishing wanted from unwanted variation. RUV-III solves this by relying on technical replication, and a list of variables (known as negative control variables) which are known a priori to be constant across all observations. Any variation in the negative control variables across the dataset is (by assumption) unwanted. So we can distinguish wanted from unwanted variation, and therefore estimate the unwanted variation and remove it. 
 #' 
 #' One problem with this approach is the presence of ``missing'' or zero values in certain application domains. For example, in proteomics it will sometimes be the case that a protein or peptide is not detected in a specific technical replicate of a sample, for purely technical reasons relating to data collection. These missing values are often not related to censoring or the limit of detection. Similar problems occur in metabolomics and single-cell transcriptomics. In all these cases, the metabolite, gene or peptide will be recorded as a zero in the data matrix. Where this type of variation occurs between technical replicates (e.g. one records a zero value and one records a non-zero value) is not correctable.  
 #'

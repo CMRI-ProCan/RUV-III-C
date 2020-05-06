@@ -4,9 +4,19 @@
 \alias{RUVIII_C_Varying}
 \title{RUV-III-C, varying controls}
 \usage{
-RUVIII_C_Varying(k, Y, M, toCorrect, filename, potentialControls,
-  withExtra = FALSE, withW = FALSE, withAlpha = FALSE,
-  batchSize = 1000, version = "CPP")
+RUVIII_C_Varying(
+  k,
+  Y,
+  M,
+  toCorrect,
+  filename,
+  potentialControls,
+  withExtra = FALSE,
+  withW = FALSE,
+  withAlpha = FALSE,
+  batchSize = 1000,
+  version = "CPP"
+)
 }
 \arguments{
 \item{k}{The number of factors of unwanted variation to remove}
@@ -38,9 +48,9 @@ If withExtra = FALSE, returns a matrix. If withExtra = TRUE, returns a list with
 Apply RUV-III-C, a variation of RUV-III that only uses non-missing values
 }
 \details{
-See the documentation of \link{RUVIII_C} for more information about the RUV-III-C method. This function is identical, except in this case the set of negative control variables actually used varies depending on the target variable to be normalized. Instead of putting in a list of negative control variables, the user specifies a list of potential negatve control variables.
+See the documentation of \link{RUVIII_C} for more information about the RUV-III-C method. This function is identical, except in this case the set of negative control variables actually used varies depending on the target variable to be normalized. Instead of putting in a list of negative control variables, the user specifies a list of potential negatve control variables. 
 
-When normalizing variable X, the algorithm begins by selecting the rows of the data matrix for which X is non-missing. Out of the potential negative control peptides, it selects those that are always non-missing across the selected subset. The standard version of RUV-III is then applied, similar to \link{RUVIII_C}.
+When normalizing variable X, the algorithm begins by selecting the rows of the data matrix for which X is non-missing. Out of the potential negative control peptides, it selects those that are always non-missing across the selected subset. The standard version of RUV-III is then applied, similar to \link{RUVIII_C}. 
 
 There are two implementations of this function, one in C++ and one in R. Select which version using the \code{version} argument, which must be either "CPP" or "R"
 }

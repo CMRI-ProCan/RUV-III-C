@@ -1,3 +1,4 @@
+#' @include RcppExports.R
 #' RUV-III-C
 #'
 #' Apply RUV-III-C, a variation of RUV-III that only uses non-missing values
@@ -41,11 +42,13 @@
 #' #All the human peptides are potential controls. That is, everything that's not an SIS peptides.
 #' potentialControls <- setdiff(peptides, sisPeptides)
 #' #But we want to use controls that are always found
-#' potentialControlsAlwaysFound <- names(which(apply(onlyPeptideData[, potentialControls], 2, function(x) sum(is.na(x))) == 0))
+#' potentialControlsAlwaysFound <- names(which(apply(onlyPeptideData[, potentialControls], 
+#' 	2, function(x) sum(is.na(x))) == 0))
 #' #Because there are so many potential controls here, we only use 500. 
 #' actualControls <- head(potentialControlsAlwaysFound, 500)
 #' #Actually run correction
-#' \dontrun{results <- RUVIII_C(k = 11, Y = onlyPeptideData, M = M, toCorrect = c(sisPeptides, actualControls), controls = actualControls, filename = "results.RData")}
+#' \dontrun{results <- RUVIII_C(k = 11, Y = onlyPeptideData, M = M, toCorrect = c(sisPeptides, 
+#' 	actualControls), controls = actualControls, filename = "results.RData")}
 #' @export
 RUVIII_C <- function(k, Y, M, toCorrect, filename, controls, withExtra = FALSE, withW = FALSE, withAlpha = FALSE, batchSize = 1000, version = "CPP")
 {

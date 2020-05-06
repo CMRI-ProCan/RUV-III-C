@@ -4,9 +4,19 @@
 \alias{RUVIII_C}
 \title{RUV-III-C}
 \usage{
-RUVIII_C(k, Y, M, toCorrect, filename, controls, withExtra = FALSE,
-  withW = FALSE, withAlpha = FALSE, batchSize = 1000,
-  version = "CPP")
+RUVIII_C(
+  k,
+  Y,
+  M,
+  toCorrect,
+  filename,
+  controls,
+  withExtra = FALSE,
+  withW = FALSE,
+  withAlpha = FALSE,
+  batchSize = 1000,
+  version = "CPP"
+)
 }
 \arguments{
 \item{k}{The number of factors of unwanted variation to remove}
@@ -38,13 +48,13 @@ If withExtra = FALSE, returns a matrix. If withExtra = TRUE, returns a list with
 Apply RUV-III-C, a variation of RUV-III that only uses non-missing values
 }
 \details{
-RUV-III is a sophisticated method for removing unwanted variation. The key difficulty in removing unwanted variation is distinguishing wanted from unwanted variation. RUV-III solves this by relying on technical replication, and a list of variables (known as negative control variables) which are known a priori to be constant across all observations. Any variation in the negative control variables across the dataset is (by assumption) unwanted. So we can distinguish wanted from unwanted variation, and therefore estimate the unwanted variation and remove it.
+RUV-III is a sophisticated method for removing unwanted variation. The key difficulty in removing unwanted variation is distinguishing wanted from unwanted variation. RUV-III solves this by relying on technical replication, and a list of variables (known as negative control variables) which are known a priori to be constant across all observations. Any variation in the negative control variables across the dataset is (by assumption) unwanted. So we can distinguish wanted from unwanted variation, and therefore estimate the unwanted variation and remove it. 
 
-One problem with this approach is the presence of ``missing'' or zero values in certain application domains. For example, in proteomics it will sometimes be the case that a protein or peptide is not detected in a specific technical replicate of a sample, for purely technical reasons relating to data collection. These missing values are often not related to censoring or the limit of detection. Similar problems occur in metabolomics and single-cell transcriptomics. In all these cases, the metabolite, gene or peptide will be recorded as a zero in the data matrix. Where this type of variation occurs between technical replicates (e.g. one records a zero value and one records a non-zero value) is not correctable.
+One problem with this approach is the presence of ``missing'' or zero values in certain application domains. For example, in proteomics it will sometimes be the case that a protein or peptide is not detected in a specific technical replicate of a sample, for purely technical reasons relating to data collection. These missing values are often not related to censoring or the limit of detection. Similar problems occur in metabolomics and single-cell transcriptomics. In all these cases, the metabolite, gene or peptide will be recorded as a zero in the data matrix. Where this type of variation occurs between technical replicates (e.g. one records a zero value and one records a non-zero value) is not correctable.  
 
-Regardless of the reason for these zeros, and whether they are accurate or not, zero values are not affected by technical variation, which breaks an assumption of the RUV-III model. In the case that a zero value is incorrect, more serious problems occur. The discrepancies between a pair of technical replicates due to zero values will appear to be much larger than the discrepancies due to other (correctable) technical factors. RUV-III will attempt to correct for the larger (uncorrectable) discrepancy, and ignore the correctable technical factors.
+Regardless of the reason for these zeros, and whether they are accurate or not, zero values are not affected by technical variation, which breaks an assumption of the RUV-III model. In the case that a zero value is incorrect, more serious problems occur. The discrepancies between a pair of technical replicates due to zero values will appear to be much larger than the discrepancies due to other (correctable) technical factors. RUV-III will attempt to correct for the larger (uncorrectable) discrepancy, and ignore the correctable technical factors. 
 
-RUV-III-C is a variation of RUV-III that attempts to solve this problem, by applying RUV-III separately to every variable. If variable X is being corrected, we take the rows of the data matrix for which X is non-missing. RUV-III is then applied, and the corrected values of X is retained. The corrected values of all other variables are discarded. Note that when we take a subset of the rows of the data matrix, other columns besides X will still have missing values. These values are replaced with zero in order to apply RUV-III. No additional transformation is applied to the input data matrix. If normalization should be applied on the log-scale, then logged data must be input.
+RUV-III-C is a variation of RUV-III that attempts to solve this problem, by applying RUV-III separately to every variable. If variable X is being corrected, we take the rows of the data matrix for which X is non-missing. RUV-III is then applied, and the corrected values of X is retained. The corrected values of all other variables are discarded. Note that when we take a subset of the rows of the data matrix, other columns besides X will still have missing values. These values are replaced with zero in order to apply RUV-III. No additional transformation is applied to the input data matrix. If normalization should be applied on the log-scale, then logged data must be input. 
 
 There are two implementations of this function, one in C++ and one in R. Select which version using the \code{version} argument, which must be either "CPP" or "R"
 
@@ -63,9 +73,11 @@ onlyPeptideData <- data.matrix(peptideData[, peptides])
 #All the human peptides are potential controls. That is, everything that's not an SIS peptides.
 potentialControls <- setdiff(peptides, sisPeptides)
 #But we want to use controls that are always found
-potentialControlsAlwaysFound <- names(which(apply(onlyPeptideData[, potentialControls], 2, function(x) sum(is.na(x))) == 0))
+potentialControlsAlwaysFound <- names(which(apply(onlyPeptideData[, potentialControls], 
+	2, function(x) sum(is.na(x))) == 0))
 #Because there are so many potential controls here, we only use 500. 
 actualControls <- head(potentialControlsAlwaysFound, 500)
 #Actually run correction
-\dontrun{results <- RUVIII_C(k = 11, Y = onlyPeptideData, M = M, toCorrect = c(sisPeptides, actualControls), controls = actualControls, filename = "results.RData")}
+\dontrun{results <- RUVIII_C(k = 11, Y = onlyPeptideData, M = M, toCorrect = c(sisPeptides, 
+	actualControls), controls = actualControls, filename = "results.RData")}
 }

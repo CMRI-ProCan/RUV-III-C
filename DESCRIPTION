@@ -6,21 +6,22 @@ Date: 2019-11-13
 Author: Rohan Shah
 Maintainer: Rohan Shah <rshah@cmri.org.au>
 Description: Variations of RUV-III which perform normalisation based only on the non-missing values. Originally designed for SWATH-MS proteomics datasets. 
-License: GPL-3
+License: MIT + file LICENSE
 LazyLoad: yes
 SystemRequirements: C++11
 LinkingTo: Rcpp, RcppEigen, RSpectra
 Imports: Rcpp
 Suggests:
-    ruv
+    ruv,
+    testthat
 Depends: 
     R (>= 3.4),
     RSpectra,
     progress
 Collate:
-    'RUVIII_C_Varying.R'
+    'RcppExports.R'
     'RUVIII_C.R'
+    'RUVIII_C_Varying.R'
     'data.R'
     'roxygen.R'
-    'RcppExports.R'
-RoxygenNote: 6.1.1
+RoxygenNote: 7.0.2

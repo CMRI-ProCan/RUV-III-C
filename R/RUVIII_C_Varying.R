@@ -1,3 +1,4 @@
+#' @include RcppExports.R
 #' RUV-III-C, varying controls
 #'
 #' Apply RUV-III-C, a variation of RUV-III that only uses non-missing values

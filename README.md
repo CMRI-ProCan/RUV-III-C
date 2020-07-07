@@ -53,3 +53,6 @@ Alternatively, we can use controls that are _not_ found in every sample.
 actualControls <- head(potentialControls, 1000)
 results <- RUVIII_C_Varying(k = 11, Y = onlyPeptideData, M = M, toCorrect = c(sisPeptides, actualControls), controls = actualControls)
 ```
+
+# Credits
+Rohan Shah, Qing Zhong. 

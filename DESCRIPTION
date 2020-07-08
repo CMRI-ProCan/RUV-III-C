@@ -9,7 +9,7 @@ Description: Variations of RUV-III which perform normalisation based only on the
 License: MIT + file LICENSE
 LazyLoad: yes
 SystemRequirements: C++11
-LinkingTo: Rcpp, RcppEigen, RSpectra
+LinkingTo: Rcpp, RcppEigen, RSpectra, RcppProgress
 Imports: Rcpp
 Suggests:
     ruv,

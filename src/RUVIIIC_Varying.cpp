@@ -2,7 +2,8 @@
 #include "RcppEigen.h"
 #include <limits>
 #include <SymEigs.h>
-
+#include <progress.hpp>
+#include <progress_bar.hpp>
 /// @brief Apply RUV-III-C, with a varying set of control variables
 ///
 /// @param input The input data matrix to correct
@@ -72,6 +73,8 @@ Rcpp::RObject RUVIIIC_Varying(Rcpp::NumericMatrix input, int k, Rcpp::NumericMat
 
 	Eigen::MatrixXd inputSymmetrised = inputAsRowMajorImputed * inputAsRowMajorImputed.transpose();
 
+	//Progress bar (openmp safe)
+	Progress progressBar(nCorrections, true);
 	std::vector<std::string> errors;
 	#pragma omp parallel
 	{
@@ -305,6 +308,7 @@ Rcpp::RObject RUVIIIC_Varying(Rcpp::NumericMatrix input, int k, Rcpp::NumericMat
 			{
 				residualDimensions[i] = currentResidualDimensions;
 			}
+			progressBar.increment();
 		}
 	}
 	if(errors.size() > 0)

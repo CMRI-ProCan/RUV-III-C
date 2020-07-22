@@ -15,17 +15,19 @@ Normalisation is an essential step in the analysis of any large omic dataset. So
 
 ## Hardware Requirements
 
-There is mimimum requirement to use the `RUV-III-C` package, but you must have sufficient RAM to run the analysis requested. Here ``sufficient'' means enough RAM to load the input data, and also enough for a working set per-thread. This means that memory scales linearly with the number of threads. If you run out of memory, consider lowering the number of threads used. The package will by default use as many threads as there are cores available, although the number of threads can be restricted. 
+There is no minimum requirement to use the `RUV-III-C` package, but you must have sufficient RAM to run the analysis requested. Here ``sufficient'' means enough RAM to load the input data, and also enough for a working set per-thread. This means that memory scales linearly with the number of threads. If you run out of memory, consider lowering the number of threads used. The package will by default use as many threads as there are cores available, although the number of threads can be restricted. 
 
-Four CPU cores and 16GB RAM are much more than is necesarry to run the provided example. 
+Four CPU cores and 16GB RAM are much more than is necessary to run the provided example. 
 
 ## Software Requirements
 
 ### OS Requirements
 
-This package was developed and tested primarily on Linux. It is compatible with the Linux, Mac and Windows operating systems. 
+This package was developed and tested primarily on Linux. It is compatible with the Linux, Mac and Windows operating systems.
 
 Several dependency packages must be installed, and a minimum R version of 3.4.0 is suggested. Earlier versions of R are expected to also work, but this is entirely untested. 
+
+On Linux the package is configured to use the system Basic Linear Algebra Subprogram (BLAS) library, making performance on Linux much better than on Windows. The requirement for a system BLAS library can be dropped by removing the flag `-DEIGEN_USE_BLAS` from src/Makevars, however this will remove the performance improvement compared to Windows. 
 
 # Installation Guide
 
@@ -37,6 +39,15 @@ Users should install the following packages prior to installing `RUVIIIC`, from 
 ```
 install.packages(c('RSpectra', 'progress', 'Rcpp', 'RcppEigen'))
 ```
+
+The package has been tested with the following versions of these dependencies:
+```
+RSpectra_0.14-0
+progress_1.2.0
+Rcpp_1.0.1
+RcppEigen_0.3.3.5.0
+```
+However, it is expected that all newer versions of these packages will also work. 
 
 ### Package Installation
 
@@ -51,7 +62,7 @@ The package should take less than a minute to install.
 
 # Instructions for use
 
-Run this software on your dataset using the same method outline in the following demo. 
+Run this software on your dataset using the same method outlined in the following demo. 
 
 # Demo
 

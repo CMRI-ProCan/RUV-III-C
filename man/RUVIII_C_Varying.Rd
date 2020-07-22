@@ -9,13 +9,21 @@ RUVIII_C_Varying(
   Y,
   M,
   toCorrect,
+<<<<<<< HEAD
   filename,
+=======
+>>>>>>> master
   potentialControls,
   withExtra = FALSE,
   withW = FALSE,
   withAlpha = FALSE,
+<<<<<<< HEAD
   batchSize = 1000,
   version = "CPP"
+=======
+  version = "CPP",
+  ...
+>>>>>>> master
 )
 }
 \arguments{
@@ -27,19 +35,22 @@ RUVIII_C_Varying(
 
 \item{toCorrect}{The names of the variables to correct using RUV-III-C}
 
-\item{filename}{The intermediate file in which to save the results.}
-
 \item{potentialControls}{The names of the control variables which are known to be constant across the observations}
 
 \item{withExtra}{Should we generate extra information?}
 
 \item{withW}{Should we generate the matrices W giving information about the unwanted factors, for every peptide?}
+<<<<<<< HEAD
 
 \item{withAlpha}{Should we generate, per-peptide, the matrix alpha giving the effects of the unwanted factors?}
+=======
+>>>>>>> master
 
-\item{batchSize}{How often should we write to the intermediate file? The default of 1000 implies that results are written to file every 1000 variables.}
+\item{withAlpha}{If we are generating extra information, should we generate alpha per variable?}
 
 \item{version}{The version of the underlying code to use. Must be either "CPP" or "R"}
+
+\item{...}{Other arguments for the prototype R code. Supported values are \code{filename} for a checkpoint file, and \code{batchSize} for the frequency with which the checkpoint file is written.}
 }
 \value{
 If withExtra = FALSE, returns a matrix. If withExtra = TRUE, returns a list with entries named \code{newY}, \code{residualDimensions} and \code{W}.

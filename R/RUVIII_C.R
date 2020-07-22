@@ -11,21 +11,18 @@
 #' 
 #' RUV-III-C is a variation of RUV-III that attempts to solve this problem, by applying RUV-III separately to every variable. If variable X is being corrected, we take the rows of the data matrix for which X is non-missing. RUV-III is then applied, and the corrected values of X is retained. The corrected values of all other variables are discarded. Note that when we take a subset of the rows of the data matrix, other columns besides X will still have missing values. These values are replaced with zero in order to apply RUV-III. No additional transformation is applied to the input data matrix. If normalization should be applied on the log-scale, then logged data must be input. 
 #'
-#' There are two implementations of this function, one in C++ and one in R. Select which version using the \code{version} argument, which must be either "CPP" or "R"
-#' 
-#' The R implementation of this function takes an optional intermediate filename, used to store the results. If the function is run again, the previously computed results are loaded directly from the intermediate file, without checking if the inputs specified to the function are the same as those used to generate the previous intermediate result. To re-run a computation, the intermediate file must be deleted. If the intermediate filename is set to NULL, no intermediate file is used. The C++ implementation never saves an intermediate file. 
+#' There are two implementations of this function, the preferred C++ version and the original protoype R code. Select which version using the \code{version} argument, which must be either "CPP" or "R"
 #' 
 #' @param k The number of factors of unwanted variation to remove
 #' @param Y The input data matrix. Must be a matrix, not a data.frame. It should contain missing (NA) values, rather than zeros. No additional transformation is applied to the input data. 
 #' @param M The design matrix containing information about technical replicates. It should not contain an intercept term!
 #' @param toCorrect The names of the variables to correct using RUV-III-C
-#' @param filename The intermediate file in which to save the results, in the R version. Set to NULL to not use an intermediate file. The C++ version never saves an intermediate file. 
 #' @param controls The names of the control variables which are known to be constant across the observations
-#' @param withExtra Should we generate extra information? 
-#' @param withW Should we generate the matrices W giving information about the unwanted factors, for every peptide?
-#' @param batchSize How often should we write to the intermediate file? The default of 1000 implies that results are written to file every 1000 variables. 
-#' @param version The version of the underlying code to use. Must be either "CPP" or "R"
+#' @param withExtra Should we generate extra information?
 #' @param withAlpha Should we generate, per-peptide, the matrix alpha giving the effects of the unwanted factors?
+#' @param withW Should we generate the matrices W giving information about the unwanted factors, for every peptide?
+#' @param version The version of the underlying code to use. Must be either "CPP" or "R"
+#' @param ... Other arguments for the prototype R code. Supported values are \code{filename} for a checkpoint file, and \code{batchSize} for the frequency with which the checkpoint file is written. 
 #'
 #' @return If withExtra = FALSE, returns a matrix. If withExtra = TRUE, returns a list with entries named \code{newY}, \code{residualDimensions} and \code{W}.
 #'
@@ -42,15 +39,16 @@
 #' #All the human peptides are potential controls. That is, everything that's not an SIS peptides.
 #' potentialControls <- setdiff(peptides, sisPeptides)
 #' #But we want to use controls that are always found
-#' potentialControlsAlwaysFound <- names(which(apply(onlyPeptideData[, potentialControls], 
-#' 	2, function(x) sum(is.na(x))) == 0))
+#' potentialControlsAlwaysFound <- names(which(apply(onlyPeptideData[, potentialControls], 2, 
+#'     function(x) sum(is.na(x))) == 0))
 #' #Because there are so many potential controls here, we only use 500. 
 #' actualControls <- head(potentialControlsAlwaysFound, 500)
 #' #Actually run correction
-#' \dontrun{results <- RUVIII_C(k = 11, Y = onlyPeptideData, M = M, toCorrect = c(sisPeptides, 
-#' 	actualControls), controls = actualControls, filename = "results.RData")}
+#' \dontrun{results <- RUVIII_C_R(k = 11, Y = onlyPeptideData, M = M, toCorrect = 
+#'     c(sisPeptides, actualControls), controls = actualControls)}
+#' @include RcppExports.R
 #' @export
-RUVIII_C <- function(k, Y, M, toCorrect, filename, controls, withExtra = FALSE, withW = FALSE, withAlpha = FALSE, batchSize = 1000, version = "CPP")
+RUVIII_C <- function(k, Y, M, toCorrect, controls, withExtra = FALSE, withW = FALSE, withAlpha = FALSE, version = "CPP", ...)
 {
 	if(nrow(M) != nrow(Y))
 	{
@@ -66,18 +64,18 @@ RUVIII_C <- function(k, Y, M, toCorrect, filename, controls, withExtra = FALSE, 
 	}
 	if(version == "CPP")
 	{
-		return(RUVIII_C_CPP(k = k, Y = Y, M = M, toCorrect = toCorrect, controls = controls, withExtra = withExtra, withW = withW, withAlpha = withAlpha))
+		return(RUVIIIC_CPP(k = k, Y = Y, M = M, toCorrect = toCorrect, controls = controls, withExtra = withExtra, withW = withW, withAlpha = withAlpha))
 	}
 	else if(version == "R")
 	{
-		return(RUVIII_C_R(k = k, Y = Y, M = M, toCorrect = toCorrect, filename = filename, controls = controls, withExtra = withExtra, withW = withW, withAlpha = withAlpha, batchSize = batchSize))
+		return(RUVIIIC_R(k = k, Y = Y, M = M, toCorrect = toCorrect, controls = controls, withExtra = withExtra, withW = withW, withAlpha = withAlpha, ...))
 	}
 	else
 	{
 		stop("version must be either 'CPP' or 'R'")
 	}
 }
-RUVIII_C_R <- function(k, Y, M, toCorrect, filename, controls, withExtra = FALSE, withW = FALSE, withAlpha = FALSE, batchSize = 1000)
+RUVIIIC_R <- function(k, Y, M, toCorrect, filename, controls, withExtra = FALSE, withW = FALSE, withAlpha = FALSE, batchSize = 1000)
 {
 	if(missing(filename))
 	{

@@ -9,21 +9,12 @@ RUVIII_C_Varying(
   Y,
   M,
   toCorrect,
-<<<<<<< HEAD
-  filename,
-=======
->>>>>>> master
   potentialControls,
   withExtra = FALSE,
   withW = FALSE,
   withAlpha = FALSE,
-<<<<<<< HEAD
-  batchSize = 1000,
-  version = "CPP"
-=======
   version = "CPP",
   ...
->>>>>>> master
 )
 }
 \arguments{
@@ -40,13 +31,8 @@ RUVIII_C_Varying(
 \item{withExtra}{Should we generate extra information?}
 
 \item{withW}{Should we generate the matrices W giving information about the unwanted factors, for every peptide?}
-<<<<<<< HEAD
 
 \item{withAlpha}{Should we generate, per-peptide, the matrix alpha giving the effects of the unwanted factors?}
-=======
->>>>>>> master
-
-\item{withAlpha}{If we are generating extra information, should we generate alpha per variable?}
 
 \item{version}{The version of the underlying code to use. Must be either "CPP" or "R"}
 

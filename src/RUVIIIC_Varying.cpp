@@ -5,10 +5,10 @@
 
 /// @brief Apply RUV-III-C, with a varying set of control variables
 ///
-/// @param input The input data matrix to correct
+/// @param Y The input data matrix to correct
 /// @param k The number of factors of unwanted variation to remove
 /// @param M The replicate matrix
-/// @param controls The names of the negative control variables
+/// @param potentialControls The names of the negative control variables
 /// @param toCorrect The names of the variables to correct
 /// @param withExtra Should we generate extra information?
 /// @param withW Should we generate the matrices W giving information about the unwanted factors, for every peptide?
@@ -18,21 +18,29 @@
 ///	Gagnon-Bartsch, J. A. and Speed, T. P. (2012). Using control genes to correct for unwanted variation in microarray data. Biostatistics, 13(3), 539–552.
 ///	Gagnon-Bartsch, J. A., Jacob, L., and Speed, T. P. (2013). Removing unwanted variation from high dimensional data with negative controls.
 // [[Rcpp::export]]
-Rcpp::RObject RUVIIIC_Varying(Rcpp::NumericMatrix input, int k, Rcpp::NumericMatrix M, Rcpp::CharacterVector controls, Rcpp::CharacterVector toCorrect, bool withExtra, bool withW, bool withAlpha)
+Rcpp::RObject RUVIIIC_Varying_CPP(Rcpp::NumericMatrix Y, int k, Rcpp::NumericMatrix M, Rcpp::CharacterVector potentialControls, Rcpp::CharacterVector toCorrect, bool withExtra, bool withW, bool withAlpha)
 {
 	//Result matrix
-	Rcpp::NumericMatrix results(input.nrow(), toCorrect.size());
+	Rcpp::NumericMatrix results(Y.nrow(), toCorrect.size());
 	Rcpp::colnames(results) = toCorrect;
-	Rcpp::rownames(results) = Rcpp::rownames(input);
+	Rcpp::rownames(results) = Rcpp::rownames(Y);
 	//Eigen view of the results matrix
 	Eigen::Map<Eigen::MatrixXd> resultsAsEigen(Rcpp::as<Eigen::Map<Eigen::MatrixXd> >(results));
 	//Names of columns in the input
-	std::vector<std::string> dataMatrixColumnNames = Rcpp::as<std::vector<std::string> >(colnames(input));
+	std::vector<std::string> dataMatrixColumnNames = Rcpp::as<std::vector<std::string> >(colnames(Y));
 	//Number of peptides to correct
 	int nCorrections = static_cast<int>(toCorrect.size());
 	//Number of samples in the data matrix
-	int nRows = static_cast<int>(input.nrow());
-	int nColumns = static_cast<int>(input.ncol());
+	int nRows = static_cast<int>(Y.nrow());
+	int nColumns = static_cast<int>(Y.ncol());
+	if(k >= nRows)
+	{
+		throw std::runtime_error("Input k cannot be larger than or equal to the number of rows in the Y matrix");
+	}
+	if(k > potentialControls.size())
+	{
+		throw std::runtime_error("Input k cannot be larger than the number of negative controls");
+	}
 
 	//Vector of W results, if required.
 	std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::ColMajor> > WValues(nCorrections);
@@ -41,7 +49,7 @@ Rcpp::RObject RUVIIIC_Varying(Rcpp::NumericMatrix input, int k, Rcpp::NumericMat
 	//Vector of residual dimensions
 	std::vector<int> residualDimensions(nCorrections, -1);
 
-	std::vector<std::string> controlNames = Rcpp::as<std::vector<std::string> >(controls);
+	std::vector<std::string> controlNames = Rcpp::as<std::vector<std::string> >(potentialControls);
 	//Indices of control variables within the input matrix
 	std::vector<int> controlIndices;
 	for(std::string control : controlNames)
@@ -55,7 +63,7 @@ Rcpp::RObject RUVIIIC_Varying(Rcpp::NumericMatrix input, int k, Rcpp::NumericMat
 	}
 
 	//Create an Eigen view of the matrix
-	Eigen::Map<Eigen::MatrixXd> inputAsEigen(Rcpp::as<Eigen::Map<Eigen::MatrixXd> >(input));
+	Eigen::Map<Eigen::MatrixXd> inputAsEigen(Rcpp::as<Eigen::Map<Eigen::MatrixXd> >(Y));
 
 	//Create an Eigen view of the M matrix
 	Eigen::Map<Eigen::MatrixXd> MAsEigen(Rcpp::as<Eigen::Map<Eigen::MatrixXd> >(M));
@@ -172,7 +180,7 @@ Rcpp::RObject RUVIIIC_Varying(Rcpp::NumericMatrix input, int k, Rcpp::NumericMat
 				int correctedCounter = 0;
 				for(int row = 0; row < nRows; row++)
 				{
-					if(std::isnan(input(row, columnIndexWithinInput)))
+					if(std::isnan(Y(row, columnIndexWithinInput)))
 					{
 						resultsAsEigen(row, i) = std::numeric_limits<double>::quiet_NaN();
 					}
@@ -199,7 +207,7 @@ Rcpp::RObject RUVIIIC_Varying(Rcpp::NumericMatrix input, int k, Rcpp::NumericMat
 						WValues[i].resize(nRows, k);
 						for(int row = 0; row < nRows; row++)
 						{
-							if(!std::isnan(input(row, columnIndexWithinInput)))
+							if(!std::isnan(Y(row, columnIndexWithinInput)))
 							{
 								WValues[i].row(row) = currentPeptideW.row(correctedCounter);
 								correctedCounter++;
@@ -239,7 +247,6 @@ Rcpp::RObject RUVIIIC_Varying(Rcpp::NumericMatrix input, int k, Rcpp::NumericMat
 					{
 						#pragma omp critical
 						{
-							std::cout << "Not enough eigenvalues converged for variable " << currentToCorrect << ", this variable was not normalised." << std::endl;
 							for(int row = 0; row < nRows; row++)
 							{
 								resultsAsEigen(row, i) = std::numeric_limits<double>::quiet_NaN();
@@ -271,7 +278,7 @@ Rcpp::RObject RUVIIIC_Varying(Rcpp::NumericMatrix input, int k, Rcpp::NumericMat
 						if(withW) WValues[i].resize(nRows, k);
 						for(int row = 0; row < nRows; row++)
 						{
-							if(std::isnan(input(row, columnIndexWithinInput)))
+							if(std::isnan(Y(row, columnIndexWithinInput)))
 							{
 								resultsAsEigen(row, i) = std::numeric_limits<double>::quiet_NaN();
 								WValues[i].row(row) = Eigen::VectorXd::Constant(k, std::numeric_limits<double>::quiet_NaN());
@@ -289,7 +296,6 @@ Rcpp::RObject RUVIIIC_Varying(Rcpp::NumericMatrix input, int k, Rcpp::NumericMat
 				{
 					#pragma omp critical
 					{
-						std::cout << "Error in eigen decomposition for variable " << currentToCorrect << ", this variable was not normalised." << std::endl;
 						for(int row = 0; row < nRows; row++)
 						{
 							resultsAsEigen(row, i) = std::numeric_limits<double>::quiet_NaN();
@@ -315,7 +321,7 @@ Rcpp::RObject RUVIIIC_Varying(Rcpp::NumericMatrix input, int k, Rcpp::NumericMat
 				if(WValues[i].rows() > 0)
 				{
 					WValues_R(toCorrectNames[i]) = WValues[i];
-					Rcpp::rownames(WValues_R(toCorrectNames[i])) = Rcpp::rownames(input);
+					Rcpp::rownames(WValues_R(toCorrectNames[i])) = Rcpp::rownames(Y);
 				}
 			}
 			returnValue["W"] = WValues_R;
@@ -328,7 +334,7 @@ Rcpp::RObject RUVIIIC_Varying(Rcpp::NumericMatrix input, int k, Rcpp::NumericMat
 				if(alphaValues[i].rows() > 0)
 				{
 					alphaValues_R(toCorrectNames[i]) = alphaValues[i];
-					Rcpp::colnames(alphaValues_R(toCorrectNames[i])) = Rcpp::colnames(input);
+					Rcpp::colnames(alphaValues_R(toCorrectNames[i])) = Rcpp::colnames(Y);
 				}
 			}
 			returnValue["alpha"] = alphaValues_R;

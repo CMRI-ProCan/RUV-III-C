@@ -11,15 +11,16 @@ LazyLoad: yes
 LinkingTo: Rcpp, RcppEigen, RSpectra
 Imports: Rcpp
 Suggests:
-    ruv
+    ruv,
+    testthat
 Depends: 
-    R (>= 3.4),
+    R (>= 3.5),
     RSpectra,
     progress
 Collate:
-    'RUVIII_C_Varying.R'
+    'RcppExports.R'
     'RUVIII_C.R'
+    'RUVIII_C_Varying.R'
     'data.R'
     'roxygen.R'
-    'RcppExports.R'
-RoxygenNote: 6.1.1
+RoxygenNote: 7.0.2

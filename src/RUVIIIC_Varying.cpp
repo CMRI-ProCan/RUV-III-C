@@ -20,7 +20,7 @@
 // [[Rcpp::export]]
 Rcpp::RObject RUVIIIC_Varying_CPP(Rcpp::NumericMatrix Y, int k, Rcpp::NumericMatrix M, Rcpp::CharacterVector potentialControls, Rcpp::CharacterVector toCorrect, bool withExtra, bool withW, bool withAlpha)
 {
-	if(input.nrow() != M.nrow())
+	if(Y.nrow() != M.nrow())
 	{
 		throw std::runtime_error("The number of rows in Y and M must be identical");
 	}

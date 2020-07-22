@@ -12,8 +12,14 @@ ENV DEBIAN_FRONTEND noninteractive
 COPY packages.txt .
 
 RUN apt-get update \
- && apt-get -yq dist-upgrade \
- && cat packages.txt | xargs apt-get install -y --no-install-recommends \
+ && apt-get install -y gnupg \
+ && echo deb https://cloud.r-project.org/bin/linux/ubuntu bionic-cran35/ >> /etc/apt/sources.list \
+ && gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9 \
+ && gpg -a --export E298A3A825C0D65DFD57CBB651716619E084DAB9 | apt-key add - \
+ && apt-get install -y ca-certificates \
+ && apt-get update && apt-get -yq dist-upgrade
+
+RUN cat packages.txt | xargs apt-get install -y --no-install-recommends \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
 
@@ -25,7 +31,7 @@ RUN R -e "packages <- read.table('./Rpackages.txt', stringsAsFactors=FALSE); ins
 
 RUN rm Rpackages.txt
 
-RUN R -e "source('https://bioconductor.org/biocLite.R'); biocLite('sva'); biocLite('preprocessCore')"
+RUN R -e "install.packages('BiocManager'); BiocManager::install(c('sva', 'preprocessCore'))"
 
 #Install MKL
 RUN wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB \

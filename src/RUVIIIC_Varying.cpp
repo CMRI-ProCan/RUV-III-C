@@ -1,3 +1,6 @@
+#if defined(__linux__)
+#define EIGEN_USE_BLAS 1
+#endif
 #include "Rcpp.h"
 #include "RcppEigen.h"
 #include <limits>

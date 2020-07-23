@@ -1,7 +1,7 @@
 Package: RUVIIIC
 Type: Package
 Title: RUV-III-C
-Version: 1.0.13
+Version: 1.0.14
 Date: 2020-07-23
 Author: Rohan Shah [aut, cre], Sean Peters [ctb], Qing Zhong [cbt]
 Maintainer: Rohan Shah <rshah@cmri.org.au>

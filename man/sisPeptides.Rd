@@ -6,7 +6,7 @@
 \title{List of SIS peptides from the cross-lab study of Collins et al (2017)}
 \format{An object of class \code{character} of length 29.}
 \usage{
-sisPeptides
+data(sisPeptides)
 }
 \description{
 List of SIS peptides from the cross-lab study of Collins et al (2017)

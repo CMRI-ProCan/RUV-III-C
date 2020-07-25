@@ -10,7 +10,7 @@ License: MIT + file LICENSE
 LazyLoad: yes
 LazyData: yes
 SystemRequirements: C++11
-LinkingTo: Rcpp, RcppEigen, RSpectra
+LinkingTo: Rcpp, RcppEigen, RSpectra, RcppProgress
 Imports: Rcpp
 Suggests:
     ruv,

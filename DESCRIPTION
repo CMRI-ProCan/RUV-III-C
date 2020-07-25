@@ -2,12 +2,13 @@ Package: RUVIIIC
 Type: Package
 Title: RUV-III-C
 Version: 1.0.14
-Date: 2020-07-23
+Date: 2020-07-25
 Author: Rohan Shah [aut, cre], Sean Peters [ctb], Qing Zhong [cbt]
 Maintainer: Rohan Shah <rshah@cmri.org.au>
 Description: Variations of RUV-III which perform normalisation based only on the non-missing values. Originally designed for SWATH-MS proteomics datasets. 
 License: MIT + file LICENSE
 LazyLoad: yes
+LazyData: yes
 SystemRequirements: C++11
 LinkingTo: Rcpp, RcppEigen, RSpectra
 Imports: Rcpp

@@ -6,7 +6,8 @@
 #include <limits>
 #include <SymEigs.h>
 #include <Eigen/SVD>
-
+#include <progress.hpp>
+#include <progress_bar.hpp>
 /// @brief Apply RUV-III-C
 ///
 /// @param Y The input data matrix to correct
@@ -91,6 +92,8 @@ Rcpp::RObject RUVIIIC_CPP(Rcpp::NumericMatrix Y, int k, Rcpp::NumericMatrix M, R
 
 	Eigen::MatrixXd inputSymmetrised = inputAsRowMajorImputed * inputAsRowMajorImputed.transpose();
 
+	//Progress bar (openmp safe)
+	Progress progressBar(nCorrections, true);
 	//Was there an error found during the program? We need a flag, because we can't throw exceptions from inside a parallel loop
 	std::vector<std::string> errors;
 	#pragma omp parallel
@@ -307,6 +310,7 @@ Rcpp::RObject RUVIIIC_CPP(Rcpp::NumericMatrix Y, int k, Rcpp::NumericMatrix M, R
 			{
 				residualDimensions[i] = currentResidualDimensions;
 			}
+			progressBar.increment();
 		}
 	}
 	if(errors.size() > 0)

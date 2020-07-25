@@ -3,7 +3,7 @@
 # Copyright (c) CMRI-ProCan Team.
 # Distributed under the terms of the Modified BSD License.
 
-FROM cmriprocan/ruviii_c-base:0.0.2
+FROM cmriprocan/ruviii_c-base:0.0.3
 
 USER root
 

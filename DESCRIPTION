@@ -3,7 +3,7 @@ Type: Package
 Title: RUV-III-C
 Version: 1.0.15
 Date: 2020-07-25
-Author: Rohan Shah [aut, cre], Sean Peters [ctb], Qing Zhong [cbt], Children's Medical Research Institute [cph]
+Author: Rohan Shah [aut, cre], Sean Peters [ctb], Qing Zhong [ctb], Children's Medical Research Institute [cph]
 Maintainer: Rohan Shah <rshah@cmri.org.au>
 Description: Variations of RUV-III which perform normalisation based only on the non-missing values. Originally designed for SWATH-MS proteomics datasets. 
     Poulos et al. (2020) <doi:10.1038/s41467-020-17641-3>. 

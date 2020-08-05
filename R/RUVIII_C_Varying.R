@@ -265,6 +265,25 @@ RUVIIIC_Varying_R <- function(k, Y, M, toCorrect, filename, potentialControls, w
 #' @param M The design matrix containing information about technical replicates. It should not contain an intercept term!
 #' @param potentialControls The names of the control variables which are known to be constant across the observations
 #' @return A vector of integers, one per column of Y. 
+#' 
+#' @examples
+#' data(crossLab)
+#' #Design matrix containing information about which runs are technical replicates of each other. 
+#' #In this case, random pairings of mass-spec runs analysing the same sample, at different sites.
+#' #Note that we specify no intercept term!
+#' M <- model.matrix(~ grouping - 1, data = peptideData)
+#' #Get out the list of peptides, both HEK (control) and peptides of interest.
+#' peptides <- setdiff(colnames(peptideData), c("filename", "site", "mixture", "Date", "grouping"))
+#' #Reduce the data matrix to only the peptide data
+#' onlyPeptideData <- data.matrix(peptideData[, peptides])
+#' #All the human peptides are potential controls. That is, everything that's not an SIS peptides.
+#' potentialControls <- setdiff(peptides, sisPeptides)
+#' #But we want to use controls that are *often* found
+#' potentialControlsOftenFound <- names(which(apply(onlyPeptideData[, potentialControls], 2, 
+#'     function(x) sum(is.na(x))) <= 10))
+#' #Actually run correction
+#' results <- RUVIII_C_Varying_residual_dimension(Y = log10(onlyPeptideData), M = M, 
+#'     potentialControls = potentialControlsOftenFound)
 #'
 #' @export
 RUVIII_C_Varying_residual_dimension <- function(Y, M, potentialControls)

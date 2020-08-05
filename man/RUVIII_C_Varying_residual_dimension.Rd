@@ -22,3 +22,23 @@ Compute amount of replication, assuming varying controls
 \details{
 When applying RUV-III-C with varying controls, the amount of replication available for normalisation depends on the variable being normalised. The amount of replication is measured as the number of technical replicates in which a variable is measured (rows of the design matrix) minus the number of biological samples (columns of the design matrix) in which a variable is measured. This value is useful as a filtering criteria, because variables with a low amount of replication will be poorly normalised by the RUV family of methods.
 }
+\examples{
+data(crossLab)
+#Design matrix containing information about which runs are technical replicates of each other. 
+#In this case, random pairings of mass-spec runs analysing the same sample, at different sites.
+#Note that we specify no intercept term!
+M <- model.matrix(~ grouping - 1, data = peptideData)
+#Get out the list of peptides, both HEK (control) and peptides of interest.
+peptides <- setdiff(colnames(peptideData), c("filename", "site", "mixture", "Date", "grouping"))
+#Reduce the data matrix to only the peptide data
+onlyPeptideData <- data.matrix(peptideData[, peptides])
+#All the human peptides are potential controls. That is, everything that's not an SIS peptides.
+potentialControls <- setdiff(peptides, sisPeptides)
+#But we want to use controls that are *often* found
+potentialControlsOftenFound <- names(which(apply(onlyPeptideData[, potentialControls], 2, 
+    function(x) sum(is.na(x))) <= 10))
+#Actually run correction
+results <- RUVIII_C_Varying_residual_dimension(Y = log10(onlyPeptideData), M = M, 
+    potentialControls = potentialControlsOftenFound)
+
+}

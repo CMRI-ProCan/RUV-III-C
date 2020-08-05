@@ -22,6 +22,7 @@
 #' @param withAlpha Should we generate, per-peptide, the matrix alpha giving the effects of the unwanted factors?
 #' @param withW Should we generate the matrices W giving information about the unwanted factors, for every peptide?
 #' @param version The version of the underlying code to use. Must be either "CPP" or "R"
+#' @param progress Should a progress bar be displayed?
 #' @param ... Other arguments for the prototype R code. Supported values are \code{filename} for a checkpoint file, and \code{batchSize} for the frequency with which the checkpoint file is written. 
 #'
 #' @return If withExtra = FALSE, returns a matrix. If withExtra = TRUE, returns a list with entries named \code{newY}, \code{residualDimensions} and \code{W}.

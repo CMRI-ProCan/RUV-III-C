@@ -37,6 +37,8 @@ RUVIII_C(
 
 \item{version}{The version of the underlying code to use. Must be either "CPP" or "R"}
 
+\item{progress}{Should a progress bar be displayed?}
+
 \item{...}{Other arguments for the prototype R code. Supported values are \code{filename} for a checkpoint file, and \code{batchSize} for the frequency with which the checkpoint file is written.}
 }
 \value{

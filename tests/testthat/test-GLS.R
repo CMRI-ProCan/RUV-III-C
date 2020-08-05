@@ -19,7 +19,7 @@ test_that("Test with 50 controls, R",
 			factor[c(186, 187)] <- "Pair4"
 			factor <- as.factor(factor)
 			M <- model.matrix( ~ M - 1, data = data.frame(M = factor))
-			result <- RUVIII_C(k = 4, Y = simulatedData, M = M, toCorrect = "Var1", filename = NULL, controls = paste0("Var", 950:1000), withExtra = TRUE, withW = TRUE, withAlpha = TRUE, version = "R")
+			result <- RUVIII_C(k = 4, Y = simulatedData, M = M, toCorrect = "Var1", filename = NULL, controls = paste0("Var", 950:1000), withExtra = TRUE, withW = TRUE, withAlpha = TRUE, version = "R", progress = FALSE)
 			#Check that we made the correction that we expected to, here
 			expect_equal(result$newY[indices, "Var1"], simulatedData[indices, "Var1"] - (result$W[["Var1"]][indices, ] %*% result$alpha[["Var1"]])[, "Var1"])
 
@@ -29,7 +29,7 @@ test_that("Test with 50 controls, R",
 			expect_equal(resultVanilla[,1], result$newY[indices, "Var1"])
 	
 	
-			result_varying <- RUVIII_C(k = 4, Y = simulatedData, M = M, toCorrect = "Var1", filename = NULL, controls = paste0("Var", 950:1000), withExtra = TRUE, withW = TRUE, withAlpha = TRUE, version = "R")
+			result_varying <- RUVIII_C(k = 4, Y = simulatedData, M = M, toCorrect = "Var1", filename = NULL, controls = paste0("Var", 950:1000), withExtra = TRUE, withW = TRUE, withAlpha = TRUE, version = "R", progress = FALSE)
 			expect_equal(result_varying$newY[indices, "Var1"], simulatedData[indices, "Var1"] - (result_varying$W[["Var1"]][indices, ] %*% result_varying$alpha[["Var1"]])[, "Var1"])
 			expect_equal(result$newY[indices, "Var1"], result_varying$newY[indices, "Var1"])
 		}
@@ -55,7 +55,7 @@ test_that("Test with 50 controls, CPP",
 			factor[c(186, 187)] <- "Pair4"
 			factor <- as.factor(factor)
 			M <- model.matrix( ~ M - 1, data = data.frame(M = factor))
-			result <- RUVIII_C(k = 4, Y = simulatedData, M = M, toCorrect = "Var1", filename = NULL, controls = paste0("Var", 950:1000), withExtra = TRUE, withW = TRUE, withAlpha = TRUE, version = "CPP")
+			result <- RUVIII_C(k = 4, Y = simulatedData, M = M, toCorrect = "Var1", filename = NULL, controls = paste0("Var", 950:1000), withExtra = TRUE, withW = TRUE, withAlpha = TRUE, version = "CPP", progress = FALSE)
 			#Check that we made the correction that we expected to, here
 			expect_equal(result$newY[indices, "Var1"], simulatedData[indices, "Var1"] - (result$W[["Var1"]][indices, ] %*% result$alpha[["Var1"]])[, "Var1"])
 
@@ -65,7 +65,7 @@ test_that("Test with 50 controls, CPP",
 			expect_equal(resultVanilla[,1], result$newY[indices, "Var1"])
 	
 	
-			result_varying <- RUVIII_C(k = 4, Y = simulatedData, M = M, toCorrect = "Var1", filename = NULL, controls = paste0("Var", 950:1000), withExtra = TRUE, withW = TRUE, withAlpha = TRUE, version = "CPP")
+			result_varying <- RUVIII_C(k = 4, Y = simulatedData, M = M, toCorrect = "Var1", filename = NULL, controls = paste0("Var", 950:1000), withExtra = TRUE, withW = TRUE, withAlpha = TRUE, version = "CPP", progress = FALSE)
 			expect_equal(result_varying$newY[indices, "Var1"], simulatedData[indices, "Var1"] - (result_varying$W[["Var1"]][indices, ] %*% result_varying$alpha[["Var1"]])[, "Var1"])
 			expect_equal(result$newY[indices, "Var1"], result_varying$newY[indices, "Var1"])
 		}
@@ -92,7 +92,7 @@ test_that("Test with 25 controls, R",
 			factor[c(186, 187)] <- "Pair4"
 			factor <- as.factor(factor)
 			M <- model.matrix( ~ M - 1, data = data.frame(M = factor))
-			result_varying <- RUVIII_C_Varying(k = 4, Y = simulatedData, M = M, toCorrect = "Var1", filename = NULL, potentialControls = paste0("Var", 950:1000), withExtra = TRUE, withW = TRUE, withAlpha = TRUE, version = "R")
+			result_varying <- RUVIII_C_Varying(k = 4, Y = simulatedData, M = M, toCorrect = "Var1", filename = NULL, potentialControls = paste0("Var", 950:1000), withExtra = TRUE, withW = TRUE, withAlpha = TRUE, version = "R", progress = FALSE)
 			#Check that we made the correction that we expected to, here
 			expect_equal(result_varying$newY[indices, "Var1"], simulatedData[indices, "Var1"] - (result_varying$W[["Var1"]][indices, ] %*% result_varying$alpha[["Var1"]])[, "Var1"])
 
@@ -126,7 +126,7 @@ test_that("Test with 25 controls, CPP",
 			factor[c(186, 187)] <- "Pair4"
 			factor <- as.factor(factor)
 			M <- model.matrix( ~ M - 1, data = data.frame(M = factor))
-			result_varying <- RUVIII_C_Varying(k = 4, Y = simulatedData, M = M, toCorrect = "Var1", filename = NULL, potentialControls = paste0("Var", 950:1000), withExtra = TRUE, withW = TRUE, withAlpha = TRUE, version = "CPP")
+			result_varying <- RUVIII_C_Varying(k = 4, Y = simulatedData, M = M, toCorrect = "Var1", filename = NULL, potentialControls = paste0("Var", 950:1000), withExtra = TRUE, withW = TRUE, withAlpha = TRUE, version = "CPP", progress = FALSE)
 			#Check that we made the correction that we expected to, here
 			expect_equal(result_varying$newY[indices, "Var1"], simulatedData[indices, "Var1"] - (result_varying$W[["Var1"]][indices, ] %*% result_varying$alpha[["Var1"]])[, "Var1"])
 

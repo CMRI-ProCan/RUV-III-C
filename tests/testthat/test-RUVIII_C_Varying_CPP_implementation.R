@@ -15,7 +15,7 @@ test_that("Test simple scenario 1",
 		data[sample(1:length(data), 50)] <- NA
 		for(toCorrect in 1:19)
 		{
-			cppImplementation <- RUVIIIC:::RUVIIIC_Varying_CPP(Y = data, k = 1, M = M, potentialControls = as.character(11:20), toCorrect = as.character(toCorrect:(toCorrect+1)), withExtra = FALSE, withW = FALSE, withAlpha = FALSE)
+			cppImplementation <- RUVIIIC:::RUVIIIC_Varying_CPP(Y = data, k = 1, M = M, potentialControls = as.character(11:20), toCorrect = as.character(toCorrect:(toCorrect+1)), withExtra = FALSE, withW = FALSE, withAlpha = FALSE, progress = FALSE)
 			rImplementation <- RUVIIIC:::RUVIIIC_Varying_R(Y = data, k = 1, M = M, potentialControls = as.character(11:20), toCorrect = as.character(toCorrect:(toCorrect + 1)), withExtra = FALSE, filename = NULL, withW = FALSE, withAlpha = FALSE)
 			expect_equal(cppImplementation, rImplementation)
 			expect_identical(is.na(cppImplementation), is.na(rImplementation))
@@ -23,7 +23,7 @@ test_that("Test simple scenario 1",
 		}
 		for(toCorrect in 1:19)
 		{
-			cppImplementation <- RUVIIIC:::RUVIIIC_Varying_CPP(Y = data, k = 2, M = M, potentialControls = as.character(11:20), toCorrect = as.character(toCorrect:(toCorrect+1)), withExtra = FALSE, withW = FALSE, withAlpha = FALSE)
+			cppImplementation <- RUVIIIC:::RUVIIIC_Varying_CPP(Y = data, k = 2, M = M, potentialControls = as.character(11:20), toCorrect = as.character(toCorrect:(toCorrect+1)), withExtra = FALSE, withW = FALSE, withAlpha = FALSE, progress = FALSE)
 			rImplementation <- RUVIIIC:::RUVIIIC_Varying_R(Y = data, k = 2, M = M, potentialControls = as.character(11:20), toCorrect = as.character(toCorrect:(toCorrect + 1)), withExtra = FALSE, filename = NULL, withW = FALSE, withAlpha = FALSE)
 			expect_equal(cppImplementation, rImplementation)
 			expect_identical(is.na(cppImplementation), is.na(rImplementation))
@@ -50,7 +50,7 @@ test_that("Test simple scenario 2",
 		data <- data[, 20:1]
 		for(toCorrect in 1:19)
 		{
-			cppImplementation <- RUVIIIC:::RUVIIIC_Varying_CPP(Y = data, k = 1, M = M, potentialControls = as.character(11:20), toCorrect = as.character(toCorrect:(toCorrect+1)), withExtra = FALSE, withW = FALSE, withAlpha = FALSE)
+			cppImplementation <- RUVIIIC:::RUVIIIC_Varying_CPP(Y = data, k = 1, M = M, potentialControls = as.character(11:20), toCorrect = as.character(toCorrect:(toCorrect+1)), withExtra = FALSE, withW = FALSE, withAlpha = FALSE, progress = FALSE)
 			rImplementation <- RUVIIIC:::RUVIIIC_Varying_R(Y = data, k = 1, M = M, potentialControls = as.character(11:20), toCorrect = as.character(toCorrect:(toCorrect + 1)), filename = NULL, withExtra = FALSE, withW = FALSE, withAlpha = FALSE)
 			expect_equal(cppImplementation, rImplementation)
 			expect_identical(is.na(cppImplementation), is.na(rImplementation))
@@ -58,7 +58,7 @@ test_that("Test simple scenario 2",
 		}
 		for(toCorrect in 1:19)
 		{
-			cppImplementation <- RUVIIIC:::RUVIIIC_Varying_CPP(Y = data, k = 2, M = M, potentialControls = as.character(11:20), toCorrect = as.character(toCorrect:(toCorrect+1)), withExtra = FALSE, withW = FALSE, withAlpha = FALSE)
+			cppImplementation <- RUVIIIC:::RUVIIIC_Varying_CPP(Y = data, k = 2, M = M, potentialControls = as.character(11:20), toCorrect = as.character(toCorrect:(toCorrect+1)), withExtra = FALSE, withW = FALSE, withAlpha = FALSE, progress = FALSE)
 			rImplementation <- RUVIIIC:::RUVIIIC_Varying_R(Y = data, k = 2, M = M, potentialControls = as.character(11:20), toCorrect = as.character(toCorrect:(toCorrect + 1)), filename = NULL, withExtra = FALSE, withW = FALSE, withAlpha = FALSE)
 			expect_equal(cppImplementation, rImplementation)
 			expect_identical(is.na(cppImplementation), is.na(rImplementation))
@@ -86,7 +86,7 @@ test_that("Test simple scenario 3",
 		rownames(data) <- 1:20
 		for(toCorrect in 1:19)
 		{
-			cppImplementation <- RUVIIIC:::RUVIIIC_Varying_CPP(Y = data, k = 1, M = M, potentialControls = as.character(1:9), toCorrect = as.character(toCorrect:(toCorrect+1)), withExtra = FALSE, withW = FALSE, withAlpha = FALSE)
+			cppImplementation <- RUVIIIC:::RUVIIIC_Varying_CPP(Y = data, k = 1, M = M, potentialControls = as.character(1:9), toCorrect = as.character(toCorrect:(toCorrect+1)), withExtra = FALSE, withW = FALSE, withAlpha = FALSE, progress = FALSE)
 			rImplementation <- RUVIIIC:::RUVIIIC_Varying_R(Y = data, k = 1, M = M, potentialControls = as.character(1:9), toCorrect = as.character(toCorrect:(toCorrect + 1)), filename = NULL, withExtra = FALSE, withW = FALSE, withAlpha = FALSE)
 			expect_equal(cppImplementation, rImplementation)
 			expect_identical(is.na(cppImplementation), is.na(rImplementation))
@@ -94,7 +94,7 @@ test_that("Test simple scenario 3",
 		}
 		for(toCorrect in 1:19)
 		{
-			cppImplementation <- RUVIIIC:::RUVIIIC_Varying_CPP(Y = data, k = 2, M = M, potentialControls = as.character(1:9), toCorrect = as.character(toCorrect:(toCorrect+1)), withExtra = FALSE, withW = FALSE, withAlpha = FALSE)
+			cppImplementation <- RUVIIIC:::RUVIIIC_Varying_CPP(Y = data, k = 2, M = M, potentialControls = as.character(1:9), toCorrect = as.character(toCorrect:(toCorrect+1)), withExtra = FALSE, withW = FALSE, withAlpha = FALSE, progress = FALSE)
 			rImplementation <- RUVIIIC:::RUVIIIC_Varying_R(Y = data, k = 2, M = M, potentialControls = as.character(1:9), toCorrect = as.character(toCorrect:(toCorrect + 1)), filename = NULL, withExtra = FALSE, withW = FALSE, withAlpha = FALSE)
 			expect_equal(cppImplementation, rImplementation)
 			expect_identical(is.na(cppImplementation), is.na(rImplementation))
@@ -121,7 +121,7 @@ test_that("Test that there was nothing special about numeric column names",
 		rownames(data) <- paste0("C", 1:20)
 		for(toCorrect in 1:19)
 		{
-			cppImplementation <- RUVIIIC:::RUVIIIC_Varying_CPP(Y = data, k = 1, M = M, potentialControls = paste0("C", 1:9), toCorrect = paste0("C", toCorrect:(toCorrect+1)), withExtra = FALSE, withW = FALSE, withAlpha = FALSE)
+			cppImplementation <- RUVIIIC:::RUVIIIC_Varying_CPP(Y = data, k = 1, M = M, potentialControls = paste0("C", 1:9), toCorrect = paste0("C", toCorrect:(toCorrect+1)), withExtra = FALSE, withW = FALSE, withAlpha = FALSE, progress = FALSE)
 			rImplementation <- RUVIIIC:::RUVIIIC_Varying_R(Y = data, k = 1, M = M, potentialControls = paste0("C", 1:9), toCorrect = paste0("C", toCorrect:(toCorrect + 1)), filename = NULL, withExtra = FALSE, withW = FALSE, withAlpha = FALSE)
 			expect_equal(cppImplementation, rImplementation)
 			expect_identical(is.na(cppImplementation), is.na(rImplementation))
@@ -129,7 +129,7 @@ test_that("Test that there was nothing special about numeric column names",
 		}
 		for(toCorrect in 1:19)
 		{
-			cppImplementation <- RUVIIIC:::RUVIIIC_Varying_CPP(Y = data, k = 2, M = M, potentialControls = paste0("C", 1:9), toCorrect = paste0("C", toCorrect:(toCorrect+1)), withExtra = FALSE, withW = FALSE, withAlpha = FALSE)
+			cppImplementation <- RUVIIIC:::RUVIIIC_Varying_CPP(Y = data, k = 2, M = M, potentialControls = paste0("C", 1:9), toCorrect = paste0("C", toCorrect:(toCorrect+1)), withExtra = FALSE, withW = FALSE, withAlpha = FALSE, progress = FALSE)
 			rImplementation <- RUVIIIC:::RUVIIIC_Varying_R(Y = data, k = 2, M = M, potentialControls = paste0("C", 1:9), toCorrect = paste0("C", toCorrect:(toCorrect + 1)), filename = NULL, withExtra = FALSE, withW = FALSE, withAlpha = FALSE)
 			expect_equal(cppImplementation, rImplementation)
 			expect_identical(is.na(cppImplementation), is.na(rImplementation))
@@ -156,7 +156,7 @@ test_that("Test when some peptides can be corrected, and some can't",
 		rownames(data) <- paste0("C", 1:20)
 		for(toCorrect in 1:19)
 		{
-			cppImplementation <- RUVIIIC:::RUVIIIC_Varying_CPP(Y = data, k = 5, M = M, potentialControls = paste0("C", 11:20), toCorrect = paste0("C", toCorrect:(toCorrect+1)), withExtra = FALSE, withW = FALSE, withAlpha = FALSE)
+			cppImplementation <- RUVIIIC:::RUVIIIC_Varying_CPP(Y = data, k = 5, M = M, potentialControls = paste0("C", 11:20), toCorrect = paste0("C", toCorrect:(toCorrect+1)), withExtra = FALSE, withW = FALSE, withAlpha = FALSE, progress = FALSE)
 			rImplementation <- RUVIIIC:::RUVIIIC_Varying_R(Y = data, k = 5, M = M, potentialControls = paste0("C", 11:20), toCorrect = paste0("C", toCorrect:(toCorrect + 1)), filename = NULL, withExtra = FALSE, withW = FALSE, withAlpha = FALSE)
 			expect_equal(cppImplementation, rImplementation)
 			expect_identical(is.na(cppImplementation), is.na(rImplementation))

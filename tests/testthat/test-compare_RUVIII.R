@@ -19,11 +19,11 @@ test_that("Test NAs in only the corrected column",
 				{
 					copiedData <- data
 					copiedData[naIndex, targetColumn] <- NA
-					result <- RUVIII_C(Y = copiedData, k = k, M = M, toCorrect = as.character(targetColumn), controls = as.character(18:20), withExtra = FALSE, filename = NULL, version = "CPP")
+					result <- RUVIII_C(Y = copiedData, k = k, M = M, toCorrect = as.character(targetColumn), controls = as.character(18:20), withExtra = FALSE, filename = NULL, version = "CPP", progress = FALSE)
 					result_standardRUVIII <- ruv::RUVIII(Y = copiedData[-naIndex, ], M = M[-naIndex, ], k = k, ctl = 18:20)
 					expect_equal(result[-naIndex, , drop=F], result_standardRUVIII[, targetColumn, drop=F])
 					
-					result <- RUVIII_C(Y = copiedData, k = k, M = M, toCorrect = as.character(targetColumn), controls = as.character(18:20), withExtra = FALSE, filename = NULL, version = "R")
+					result <- RUVIII_C(Y = copiedData, k = k, M = M, toCorrect = as.character(targetColumn), controls = as.character(18:20), withExtra = FALSE, filename = NULL, version = "R", progress = FALSE)
 					expect_equal(result[-naIndex, , drop=F], result_standardRUVIII[, targetColumn, drop=F])
 				}
 			}
@@ -52,14 +52,14 @@ test_that("Test NAs in other columns too",
 					copiedData <- data
 					copiedData[naIndex, targetColumn] <- NA
 					copiedData[naIndex+1, targetColumn+1] <- NA
-					result <- RUVIII_C(Y = copiedData, k = k, M = M, toCorrect = as.character(targetColumn), controls = as.character(18:20), withExtra = FALSE, filename = NULL, version = "CPP")
+					result <- RUVIII_C(Y = copiedData, k = k, M = M, toCorrect = as.character(targetColumn), controls = as.character(18:20), withExtra = FALSE, filename = NULL, version = "CPP", progress = FALSE)
 
 					RUVIIIdata <- copiedData
 					RUVIIIdata[naIndex+1, targetColumn+1] <- 0
 					result_standardRUVIII <- ruv::RUVIII(Y = RUVIIIdata[-naIndex, ], M = M[-naIndex, ], k = k, ctl = 18:20)
 					expect_equal(result[-naIndex, , drop=F], result_standardRUVIII[, targetColumn, drop=F])
 					
-					result <- RUVIII_C(Y = copiedData, k = k, M = M, toCorrect = as.character(targetColumn), controls = as.character(18:20), withExtra = FALSE, filename = NULL, version = "R")
+					result <- RUVIII_C(Y = copiedData, k = k, M = M, toCorrect = as.character(targetColumn), controls = as.character(18:20), withExtra = FALSE, filename = NULL, version = "R", progress = FALSE)
 					expect_equal(result[-naIndex, , drop=F], result_standardRUVIII[, targetColumn, drop=F])
 				}
 			}

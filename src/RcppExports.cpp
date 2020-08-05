@@ -7,8 +7,8 @@
 using namespace Rcpp;
 
 // RUVIIIC_CPP
-Rcpp::RObject RUVIIIC_CPP(Rcpp::NumericMatrix Y, int k, Rcpp::NumericMatrix M, Rcpp::CharacterVector controls, Rcpp::CharacterVector toCorrect, bool withExtra, bool withW, bool withAlpha);
-RcppExport SEXP _RUVIIIC_RUVIIIC_CPP(SEXP YSEXP, SEXP kSEXP, SEXP MSEXP, SEXP controlsSEXP, SEXP toCorrectSEXP, SEXP withExtraSEXP, SEXP withWSEXP, SEXP withAlphaSEXP) {
+Rcpp::RObject RUVIIIC_CPP(Rcpp::NumericMatrix Y, int k, Rcpp::NumericMatrix M, Rcpp::CharacterVector controls, Rcpp::CharacterVector toCorrect, bool withExtra, bool withW, bool withAlpha, bool progress);
+RcppExport SEXP _RUVIIIC_RUVIIIC_CPP(SEXP YSEXP, SEXP kSEXP, SEXP MSEXP, SEXP controlsSEXP, SEXP toCorrectSEXP, SEXP withExtraSEXP, SEXP withWSEXP, SEXP withAlphaSEXP, SEXP progressSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -20,13 +20,14 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< bool >::type withExtra(withExtraSEXP);
     Rcpp::traits::input_parameter< bool >::type withW(withWSEXP);
     Rcpp::traits::input_parameter< bool >::type withAlpha(withAlphaSEXP);
-    rcpp_result_gen = Rcpp::wrap(RUVIIIC_CPP(Y, k, M, controls, toCorrect, withExtra, withW, withAlpha));
+    Rcpp::traits::input_parameter< bool >::type progress(progressSEXP);
+    rcpp_result_gen = Rcpp::wrap(RUVIIIC_CPP(Y, k, M, controls, toCorrect, withExtra, withW, withAlpha, progress));
     return rcpp_result_gen;
 END_RCPP
 }
 // RUVIIIC_Varying_CPP
-Rcpp::RObject RUVIIIC_Varying_CPP(Rcpp::NumericMatrix Y, int k, Rcpp::NumericMatrix M, Rcpp::CharacterVector potentialControls, Rcpp::CharacterVector toCorrect, bool withExtra, bool withW, bool withAlpha);
-RcppExport SEXP _RUVIIIC_RUVIIIC_Varying_CPP(SEXP YSEXP, SEXP kSEXP, SEXP MSEXP, SEXP potentialControlsSEXP, SEXP toCorrectSEXP, SEXP withExtraSEXP, SEXP withWSEXP, SEXP withAlphaSEXP) {
+Rcpp::RObject RUVIIIC_Varying_CPP(Rcpp::NumericMatrix Y, int k, Rcpp::NumericMatrix M, Rcpp::CharacterVector potentialControls, Rcpp::CharacterVector toCorrect, bool withExtra, bool withW, bool withAlpha, bool progress);
+RcppExport SEXP _RUVIIIC_RUVIIIC_Varying_CPP(SEXP YSEXP, SEXP kSEXP, SEXP MSEXP, SEXP potentialControlsSEXP, SEXP toCorrectSEXP, SEXP withExtraSEXP, SEXP withWSEXP, SEXP withAlphaSEXP, SEXP progressSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -38,14 +39,15 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< bool >::type withExtra(withExtraSEXP);
     Rcpp::traits::input_parameter< bool >::type withW(withWSEXP);
     Rcpp::traits::input_parameter< bool >::type withAlpha(withAlphaSEXP);
-    rcpp_result_gen = Rcpp::wrap(RUVIIIC_Varying_CPP(Y, k, M, potentialControls, toCorrect, withExtra, withW, withAlpha));
+    Rcpp::traits::input_parameter< bool >::type progress(progressSEXP);
+    rcpp_result_gen = Rcpp::wrap(RUVIIIC_Varying_CPP(Y, k, M, potentialControls, toCorrect, withExtra, withW, withAlpha, progress));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_RUVIIIC_RUVIIIC_CPP", (DL_FUNC) &_RUVIIIC_RUVIIIC_CPP, 8},
-    {"_RUVIIIC_RUVIIIC_Varying_CPP", (DL_FUNC) &_RUVIIIC_RUVIIIC_Varying_CPP, 8},
+    {"_RUVIIIC_RUVIIIC_CPP", (DL_FUNC) &_RUVIIIC_RUVIIIC_CPP, 9},
+    {"_RUVIIIC_RUVIIIC_Varying_CPP", (DL_FUNC) &_RUVIIIC_RUVIIIC_Varying_CPP, 9},
     {NULL, NULL, 0}
 };
 

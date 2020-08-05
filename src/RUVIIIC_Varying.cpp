@@ -22,7 +22,7 @@
 ///	Gagnon-Bartsch, J. A. and Speed, T. P. (2012). Using control genes to correct for unwanted variation in microarray data. Biostatistics, 13(3), 539–552.
 ///	Gagnon-Bartsch, J. A., Jacob, L., and Speed, T. P. (2013). Removing unwanted variation from high dimensional data with negative controls.
 // [[Rcpp::export]]
-Rcpp::RObject RUVIIIC_Varying_CPP(Rcpp::NumericMatrix Y, int k, Rcpp::NumericMatrix M, Rcpp::CharacterVector potentialControls, Rcpp::CharacterVector toCorrect, bool withExtra, bool withW, bool withAlpha)
+Rcpp::RObject RUVIIIC_Varying_CPP(Rcpp::NumericMatrix Y, int k, Rcpp::NumericMatrix M, Rcpp::CharacterVector potentialControls, Rcpp::CharacterVector toCorrect, bool withExtra, bool withW, bool withAlpha, bool progress)
 {
 	if(Y.nrow() != M.nrow())
 	{
@@ -85,7 +85,7 @@ Rcpp::RObject RUVIIIC_Varying_CPP(Rcpp::NumericMatrix Y, int k, Rcpp::NumericMat
 	Eigen::MatrixXd inputSymmetrised = inputAsRowMajorImputed * inputAsRowMajorImputed.transpose();
 
 	//Progress bar (openmp safe)
-	Progress progressBar(nCorrections, true);
+	Progress progressBar(nCorrections, progress);
 	std::vector<std::string> errors;
 	#pragma omp parallel
 	{

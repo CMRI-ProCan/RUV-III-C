@@ -14,6 +14,7 @@ RUVIII_C_Varying(
   withW = FALSE,
   withAlpha = FALSE,
   version = "CPP",
+  progress = TRUE,
   ...
 )
 }
@@ -47,7 +48,26 @@ Apply RUV-III-C, a variation of RUV-III that only uses non-missing values
 \details{
 See the documentation of \link{RUVIII_C} for more information about the RUV-III-C method. This function is identical, except in this case the set of negative control variables actually used varies depending on the target variable to be normalized. Instead of putting in a list of negative control variables, the user specifies a list of potential negatve control variables. 
 
-When normalizing variable X, the algorithm begins by selecting the rows of the data matrix for which X is non-missing. Out of the potential negative control peptides, it selects those that are always non-missing across the selected subset. The standard version of RUV-III is then applied, similar to \link{RUVIII_C}. 
+When normalizing variable X, the algorithm begins by selecting the rows of the data matrix for which X is non-missing. Out of the potential negative control peptides, it selects those that are always non-missing across the selected subset. The standard version of RUV-III is then applied to the subset, similar to \link{RUVIII_C}. 
 
 There are two implementations of this function, one in C++ and one in R. Select which version using the \code{version} argument, which must be either "CPP" or "R"
+}
+\examples{
+data(crossLab)
+#Design matrix containing information about which runs are technical replicates of each other. 
+#In this case, random pairings of mass-spec runs analysing the same sample, at different sites.
+#Note that we specify no intercept term!
+M <- model.matrix(~ grouping - 1, data = peptideData)
+#Get out the list of peptides, both HEK (control) and peptides of interest.
+peptides <- setdiff(colnames(peptideData), c("filename", "site", "mixture", "Date", "grouping"))
+#Reduce the data matrix to only the peptide data
+onlyPeptideData <- data.matrix(peptideData[, peptides])
+#All the human peptides are potential controls. That is, everything that's not an SIS peptides.
+potentialControls <- setdiff(peptides, sisPeptides)
+#But we want to use controls that are *often* found
+potentialControlsOftenFound <- names(which(apply(onlyPeptideData[, potentialControls], 2, 
+    function(x) sum(is.na(x))) <= 10))
+#Actually run correction
+\dontrun{results <- RUVIII_C(k = 11, Y = log10(onlyPeptideData), M = M, toCorrect = 
+    colnames(onlyPeptideData), controls = potentialControlsOftenFound)}
 }

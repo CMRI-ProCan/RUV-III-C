@@ -14,6 +14,7 @@ RUVIII_C(
   withW = FALSE,
   withAlpha = FALSE,
   version = "CPP",
+  progress = TRUE,
   ...
 )
 }
@@ -70,9 +71,7 @@ potentialControls <- setdiff(peptides, sisPeptides)
 #But we want to use controls that are always found
 potentialControlsAlwaysFound <- names(which(apply(onlyPeptideData[, potentialControls], 2, 
     function(x) sum(is.na(x))) == 0))
-#Because there are so many potential controls here, we only use 500. 
-actualControls <- head(potentialControlsAlwaysFound, 500)
 #Actually run correction
-\dontrun{results <- RUVIII_C_R(k = 11, Y = onlyPeptideData, M = M, toCorrect = 
-    c(sisPeptides, actualControls), controls = actualControls)}
+\dontrun{results <- RUVIII_C(k = 11, Y = log10(onlyPeptideData), M = M, toCorrect = 
+    colnames(onlyPeptideData), controls = potentialControlsAlwaysFound)}
 }

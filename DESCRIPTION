@@ -13,7 +13,6 @@ LazyLoad: yes
 LazyData: yes
 SystemRequirements: C++11
 LinkingTo: Rcpp, RcppEigen, RSpectra, RcppProgress
-Imports: Rcpp
 Suggests:
     ruv,
     testthat

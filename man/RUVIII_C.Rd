@@ -74,6 +74,6 @@ potentialControls <- setdiff(peptides, sisPeptides)
 potentialControlsAlwaysFound <- names(which(apply(onlyPeptideData[, potentialControls], 2, 
     function(x) sum(is.na(x))) == 0))
 #Actually run correction
-\dontrun{results <- RUVIII_C(k = 11, Y = log10(onlyPeptideData), M = M, toCorrect = 
+\donttest{results <- RUVIII_C(k = 11, Y = log10(onlyPeptideData), M = M, toCorrect = 
     colnames(onlyPeptideData), controls = potentialControlsAlwaysFound)}
 }

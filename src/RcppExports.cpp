@@ -44,10 +44,33 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// RUVIIIC_omp_set_num_threads
+SEXP RUVIIIC_omp_set_num_threads(SEXP num);
+RcppExport SEXP _RUVIIIC_RUVIIIC_omp_set_num_threads(SEXP numSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type num(numSEXP);
+    rcpp_result_gen = Rcpp::wrap(RUVIIIC_omp_set_num_threads(num));
+    return rcpp_result_gen;
+END_RCPP
+}
+// RUVIIIC_omp_get_num_threads
+SEXP RUVIIIC_omp_get_num_threads();
+RcppExport SEXP _RUVIIIC_RUVIIIC_omp_get_num_threads() {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    rcpp_result_gen = Rcpp::wrap(RUVIIIC_omp_get_num_threads());
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_RUVIIIC_RUVIIIC_CPP", (DL_FUNC) &_RUVIIIC_RUVIIIC_CPP, 9},
     {"_RUVIIIC_RUVIIIC_Varying_CPP", (DL_FUNC) &_RUVIIIC_RUVIIIC_Varying_CPP, 9},
+    {"_RUVIIIC_RUVIIIC_omp_set_num_threads", (DL_FUNC) &_RUVIIIC_RUVIIIC_omp_set_num_threads, 1},
+    {"_RUVIIIC_RUVIIIC_omp_get_num_threads", (DL_FUNC) &_RUVIIIC_RUVIIIC_omp_get_num_threads, 0},
     {NULL, NULL, 0}
 };
 

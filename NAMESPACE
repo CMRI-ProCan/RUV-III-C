@@ -3,6 +3,8 @@
 export(RUVIII_C)
 export(RUVIII_C_Varying)
 export(RUVIII_C_Varying_residual_dimension)
+export(omp_get_num_threads)
+export(omp_set_num_threads)
 importFrom(RSpectra,eigs_sym)
 importFrom(progress,progress_bar)
 useDynLib(RUVIIIC)

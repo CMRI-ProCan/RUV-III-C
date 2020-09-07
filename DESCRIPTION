@@ -26,4 +26,5 @@ Collate:
     'RUVIII_C_Varying.R'
     'data.R'
     'roxygen.R'
+    'threads.R'
 RoxygenNote: 7.1.1

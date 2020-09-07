@@ -9,3 +9,11 @@ RUVIIIC_Varying_CPP <- function(Y, k, M, potentialControls, toCorrect, withExtra
     .Call('_RUVIIIC_RUVIIIC_Varying_CPP', PACKAGE = 'RUVIIIC', Y, k, M, potentialControls, toCorrect, withExtra, withW, withAlpha, progress)
 }
 
+RUVIIIC_omp_set_num_threads <- function(num) {
+    .Call('_RUVIIIC_RUVIIIC_omp_set_num_threads', PACKAGE = 'RUVIIIC', num)
+}
+
+RUVIIIC_omp_get_num_threads <- function() {
+    .Call('_RUVIIIC_RUVIIIC_omp_get_num_threads', PACKAGE = 'RUVIIIC')
+}
+

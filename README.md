@@ -58,7 +58,7 @@ From an `R` session, type:
 
 ```
 require(devtools)
-install_github('CMRI-ProCan/RUVIIIC')
+install_github('CMRI-ProCan/RUV-III-C')
 ```
 Alternatively, from the console run:
 ```

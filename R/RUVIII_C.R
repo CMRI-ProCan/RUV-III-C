@@ -44,7 +44,7 @@
 #'     function(x) sum(is.na(x))) == 0))
 #' #Actually run correction
 #' #Set number of threads for CRAN
-#' RUVIIIC::omp_set_num_threads(2L)
+#' try(RUVIIIC::omp_set_num_threads(2L), silent=TRUE)
 #' \donttest{results <- RUVIII_C(k = 11, Y = log10(onlyPeptideData), M = M, toCorrect = 
 #'     colnames(onlyPeptideData), controls = potentialControlsAlwaysFound)}
 #' @include RcppExports.R

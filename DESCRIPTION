@@ -1,9 +1,10 @@
 Package: RUVIIIC
 Type: Package
 Title: RUV-III-C
-Version: 1.0.17
-Date: 2020-08-31
+Version: 1.0.18
+Date: 2021-04-09
 Author: Rohan Shah [aut, cre], Sean Peters [ctb], Qing Zhong [ctb], Children's Medical Research Institute [cph]
+Authors@R: c(person("Rohan", "Shah", role = c("aut", "cre"), email = "rshah@cmri.org.au"), person("Sean", "Peters", role = "ctb"), person("Qing", "Zhong", role = "ctb"), person("Children's Medical Research Institute", role = "cph"))
 Maintainer: Rohan Shah <rshah@cmri.org.au>
 Description: Variations of Remove Unwanted Variation-III (RUV-III) known as RUV-III-C (RUV-III Complete). RUV-III performs normalisation using negative control variables and replication. RUV-III-C extends this method to cases where the data contains missing values, by applying RUV-III to complete subsets of the data. Originally designed for SWATH-MS proteomics datasets. 
     Poulos et al. (2020) <doi:10.1038/s41467-020-17641-3>. 

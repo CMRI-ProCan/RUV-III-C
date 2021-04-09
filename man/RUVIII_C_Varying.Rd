@@ -70,8 +70,8 @@ potentialControls <- setdiff(peptides, sisPeptides)
 potentialControlsOftenFound <- names(which(apply(onlyPeptideData[, potentialControls], 2, 
     function(x) sum(is.na(x))) <= 10))
 #Set number of threads for CRAN
-RUVIIIC::omp_set_num_threads(2L)
+try(RUVIIIC::omp_set_num_threads(2L), silent=TRUE)
 #Actually run correction
-\donttest{results <- RUVIII_C(k = 11, Y = log10(onlyPeptideData), M = M, toCorrect = 
-    colnames(onlyPeptideData), controls = potentialControlsOftenFound)}
+\donttest{results <- RUVIII_C_Varying(k = 11, Y = log10(onlyPeptideData), M = M, toCorrect = 
+    colnames(onlyPeptideData), potentialControls = potentialControlsOftenFound)}
 }

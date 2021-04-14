@@ -290,7 +290,7 @@ Rcpp::RObject RUVIIIC_Varying_CPP(Rcpp::NumericMatrix Y, int k, Rcpp::NumericMat
 							if(std::isnan(Y(row, columnIndexWithinInput)))
 							{
 								resultsAsEigen(row, i) = std::numeric_limits<double>::quiet_NaN();
-								WValues[i].row(row) = Eigen::VectorXd::Constant(k, std::numeric_limits<double>::quiet_NaN());
+								if(withW) WValues[i].row(row) = Eigen::VectorXd::Constant(k, std::numeric_limits<double>::quiet_NaN());
 							}
 							else 
 							{

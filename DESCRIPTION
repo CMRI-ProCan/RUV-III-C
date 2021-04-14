@@ -1,8 +1,8 @@
 Package: RUVIIIC
 Type: Package
 Title: RUV-III-C
-Version: 1.0.18
-Date: 2021-04-09
+Version: 1.0.19
+Date: 2021-04-14
 Author: Rohan Shah [aut, cre], Sean Peters [ctb], Qing Zhong [ctb], Children's Medical Research Institute [cph]
 Authors@R: c(person("Rohan", "Shah", role = c("aut", "cre"), email = "rshah@cmri.org.au"), person("Sean", "Peters", role = "ctb"), person("Qing", "Zhong", role = "ctb"), person("Children's Medical Research Institute", role = "cph"))
 Maintainer: Rohan Shah <rshah@cmri.org.au>
